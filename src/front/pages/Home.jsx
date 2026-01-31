@@ -12,10 +12,10 @@ export const Home = () => {
 
 			if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file")
 
-			const response = await fetch(backendUrl + "/api/hello")
+			const response = await fetch(backendUrl + "api/users")
 			const data = await response.json()
-
-			if (response.ok) dispatch({ type: "set_hello", payload: data.message })
+			console.log(data)
+			if (response.ok) dispatch({ type: "set_hello", payload: data.users })
 
 			return data
 
@@ -39,13 +39,6 @@ export const Home = () => {
 				<img src={rigoImageUrl} className="img-fluid rounded-circle mb-3" alt="Rigo Baby" />
 			</p>
 			<div className="alert alert-info">
-				{store.message ? (
-					<span>{store.message}</span>
-				) : (
-					<span className="text-danger">
-						Loading message from the backend (make sure your python 🐍 backend is running)...
-					</span>
-				)}
 			</div>
 		</div>
 	);

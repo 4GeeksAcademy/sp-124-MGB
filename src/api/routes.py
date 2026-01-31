@@ -28,7 +28,6 @@ def signup():
     email = request.json.get("email")
     password = request.json.get("password")
     username = request.json.get("username")
-    is_admin = request.json.get("is_admin")
     if not email or not password or not username:
         return jsonify({"msg": "Missing data"}), 400
 
@@ -42,7 +41,7 @@ def signup():
         password=password,
         username=username,
         is_active=False,
-        is_admin=is_admin
+        is_admin=False
     )
 
     db.session.add(new_user)
