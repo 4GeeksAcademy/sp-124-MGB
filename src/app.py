@@ -3,9 +3,10 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 """
 import os
 from flask import Flask, request, jsonify, url_for, send_from_directory
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from flask_migrate import Migrate
-from flask_swagger import swagger
+from flask_bcrypt import Bcrypt
+from sqlalchemy import delete, update
 from api.utils import APIException, generate_sitemap
 from api.models import User, db
 from api.routes import api
@@ -20,6 +21,7 @@ static_file_dir = os.path.join(os.path.dirname(
     os.path.realpath(__file__)), '../dist/')
 app = Flask(__name__)
 app.url_map.strict_slashes = False
+bcrypt = Bcrypt(app)
 
 # database condiguration
 db_url = os.getenv("DATABASE_URL")
@@ -80,11 +82,48 @@ def login():
 
     user = User.query.filter_by(email=email, password=password).first()
 
-    if user is None:
-        return jsonify({"msg": "Invalid credentials"}), 401
+    pw_hash = bcrypt.generate_password_hash(password)
+    if user and bcrypt.check_password_hash(pw_hash, user.password):
+        access_token = create_access_token(identity=user.email)
+        return jsonify({"token": access_token, "email": user.email})
 
-    access_token = create_access_token(identity=user.email)
-    return jsonify({"token": access_token, "email": user.email})
+    return jsonify({"msg": "Invalid credentials"}), 401
+
+
+@app.route('/profiles/<username>/settings', methods=['PUT', 'DELETE'])
+@jwt_required()
+def profile_handle(username):
+    current_user_identity = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_identity).first()
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
+
+    if request.method == "PUT":
+        case = list(request.json.keys())
+        data = request.json
+        match case[0]:
+            case "email":
+                db.session.execute(update(User).where(
+                    User.email == user.email).values(email=data[case[0]]))
+                db.session.commit()
+            case "password":
+                db.session.execute(update(User).where(
+                    User.password == user.password).values(password=data[case[0]]))
+                db.session.commit()
+            case "username":
+                db.session.execute(update(User).where(
+                    User.username == user.username).values(username=data[case[0]]))
+                db.session.commit()
+
+        return jsonify({
+            "msg": "Account details moddified correctly"
+        }), 200
+    else:
+        db.session.execute(delete(User).where(User.email == user.email))
+        db.session.commit()
+        return jsonify({
+            "msg": "Account deleted suscessfully"
+        }), 200
 
 
 # this only runs if `$ python src/main.py` is executed
