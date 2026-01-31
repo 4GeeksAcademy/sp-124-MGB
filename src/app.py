@@ -3,6 +3,7 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 """
 import os
 from flask import Flask, request, jsonify, url_for, send_from_directory
+from flask_cors import CORS
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
@@ -22,6 +23,8 @@ static_file_dir = os.path.join(os.path.dirname(
 app = Flask(__name__)
 app.url_map.strict_slashes = False
 bcrypt = Bcrypt(app)
+
+CORS(app)
 
 # database condiguration
 db_url = os.getenv("DATABASE_URL")
