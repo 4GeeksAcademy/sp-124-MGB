@@ -7,9 +7,9 @@ from flask_cors import CORS
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
-from sqlalchemy import delete, update
+from sqlalchemy import delete, update, select
 from api.utils import APIException, generate_sitemap
-from api.models import User, db
+from api.models import BacklogList, User, db
 from api.routes import api
 from api.admin import setup_admin
 from api.commands import setup_commands
@@ -93,11 +93,12 @@ def login():
     return jsonify({"msg": "Invalid credentials"}), 401
 
 
-@app.route('/profiles/<username>/settings', methods=['PUT', 'DELETE'])
+@app.route('/profiles/settings', methods=['PUT', 'DELETE'])
 @jwt_required()
-def profile_handle(username):
+def profile_handle():
     current_user_identity = get_jwt_identity()
-    user = User.query.filter_by(email=current_user_identity).first()
+    user = db.session.execute(select(User).where(
+        User.email == current_user_identity)).first()
     if not user:
         return jsonify({"msg": "User not found"}), 404
 
@@ -127,6 +128,66 @@ def profile_handle(username):
         return jsonify({
             "msg": "Account deleted suscessfully"
         }), 200
+
+
+@app.route('/backlog', methods=['POST', 'PUT', 'DELETE'])
+@jwt_required()
+def backlog():
+    current_user_identity = get_jwt_identity()
+    user = db.session.execute(select(User).where(
+        User.email == current_user_identity)).first()
+
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
+
+    match request.method:
+        case "POST":
+            game_id = request.json.get(game_id)
+            user_id = request.json.get(user_id)
+            existing_game = db.session.query.select(
+                (BacklogList).where(BacklogList.game_id == game_id and BacklogList.user_id == user_id)).first()
+            if existing_game:
+                return jsonify({"msg": "Game already in backlog of user"}), 409
+
+            new_backlog_entry = BacklogList(
+                game_id=game_id,
+                status="Not started",
+                user_id=user_id,
+            )
+            db.session.add(new_backlog_entry)
+            db.session.commit()
+
+            return jsonify({
+                "msg": "Game added succesfully to the user's backlog."
+            }), 200
+        case "PUT":
+            game_id = request.json.get(game_id)
+            user_id = request.json.get(user_id)
+            change = request.json.get(change)
+            match change:
+                case "status":
+                    status = request.json.get(status)
+                    db.session.execute(update(BacklogList).where(
+                        BacklogList.user_id == user_id and BacklogList.game_id == game_id).values(status=status))
+                    db.session.commit()
+                    return jsonify({
+                        "msg": "Game status succesfully edited from backlog of user."
+                    }), 200
+                case "rating":
+                    rating = request.json.get(rating)
+                    db.session.execute(update(BacklogList).where(
+                        BacklogList.user_id == user_id and BacklogList.game_id == game_id).values(rating=rating))
+                    db.session.commit()
+                    return jsonify({
+                        "msg": "Game rating succesfully edited from backlog of user."
+                    }), 200
+        case "DELETE":
+            db.session.execute(delete(BacklogList).where(
+                BacklogList.user_id == user_id and BacklogList.game_id == BacklogList.game_id))
+            db.session.commit()
+            return jsonify({
+                "msg": "Game deleted suscessfully from backlog of user."
+            }), 200
 
 
 # this only runs if `$ python src/main.py` is executed

@@ -3,7 +3,7 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 """
 from sqlalchemy import select
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User
+from api.models import db, User, BacklogList
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 
@@ -49,3 +49,16 @@ def signup():
     return jsonify({
         "msg": "Added user correctly"
     }), 201
+
+
+@api.route('/backlog/<username>', methods=['GET'])
+def users(username):
+    user_id = db.session.execute(
+        select(User.id).where(User.username == username)).first()
+    backlog = db.session.execute(select(BacklogList).where(
+        BacklogList.user_id == user_id)).first()
+    response_body = {
+        "backlog": list(map(lambda backlog: backlog.serialize(), backlog))
+    }
+
+    return jsonify(response_body), 200
