@@ -31,7 +31,8 @@ def signup():
     if not email or not password or not username:
         return jsonify({"msg": "Missing data"}), 400
 
-    existing_email = User.query.filter((User.email == email)).first()
+    existing_email = db.session.execute(
+        select(User).where(User.email == email)).scalars().first()
 
     if existing_email:
         return jsonify({"msg": "El email ya está registrado"}), 409

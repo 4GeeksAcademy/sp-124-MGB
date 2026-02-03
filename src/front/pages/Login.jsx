@@ -1,30 +1,37 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link, useParams } from "react-router-dom";
-
-export const Signup = () => {
+export const Login = () => {
     const navigate = useNavigate();
 
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
     const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
 
-    const handleSignup = async (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}api/signup`, {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ email, password, username })
+                body: JSON.stringify({ username, password })
             });
 
             const data = await res.json();
 
+            dispatch({
+                type: "login",
+                payload: {
+                    token: data.token,
+                    email: data.email
+                }
+            })
+
             if (!res.ok) {
                 return data.msg;
             }
+
             navigate("/")
 
         } catch (err) {
@@ -35,13 +42,8 @@ export const Signup = () => {
     return (
         <div className="container mt-5">
             <h2 className="display-6">Create account</h2>
-            <form onSubmit={handleSignup}>
+            <form onSubmit={handleLogin}>
                 <div className="mb-3 d-flex m-2 gap-2">
-                    <input className="form-control"
-                        placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
                     <input className="form-control"
                         type="password"
                         placeholder="Password"
@@ -55,7 +57,7 @@ export const Signup = () => {
                         onChange={(e) => setUsername(e.target.value)}
                     />
                 </div>
-                <button type="submit" className="btn btn-secondary">Create account</button>
+                <button type="submit" className="btn btn-secondary">Login</button>
             </form>
             <Link to="/">
                 <span className="btn btn-primary btn-lg" href="#" role="button">

@@ -8,7 +8,9 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_requir
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
 from sqlalchemy import delete, update, select
+from sqlalchemy import delete, update, select
 from api.utils import APIException, generate_sitemap
+from api.models import BacklogList, User, db
 from api.models import BacklogList, User, db
 from api.routes import api
 from api.admin import setup_admin
@@ -94,36 +96,34 @@ def login():
 
 
 @app.route('/profiles/settings', methods=['PUT', 'DELETE'])
-@jwt_required()
 def profile_handle():
-    current_user_identity = get_jwt_identity()
     user = db.session.execute(select(User).where(
-        User.email == current_user_identity)).first()
+        User.username == request.json.get("username", None))).scalars().first()
     if not user:
         return jsonify({"msg": "User not found"}), 404
 
     if request.method == "PUT":
         case = list(request.json.keys())
-        data = request.json
-        match case[0]:
+        data = request.json.get(case[1])
+        match case[1]:
             case "email":
                 db.session.execute(update(User).where(
-                    User.email == user.email).values(email=data[case[0]]))
+                    User.email == user.email).values(email=data))
                 db.session.commit()
             case "password":
                 db.session.execute(update(User).where(
-                    User.password == user.password).values(password=data[case[0]]))
+                    User.password == user.password).values(password=data))
                 db.session.commit()
             case "username":
                 db.session.execute(update(User).where(
-                    User.username == user.username).values(username=data[case[0]]))
+                    User.username == user.username).values(username=data))
                 db.session.commit()
 
         return jsonify({
             "msg": "Account details moddified correctly"
         }), 200
     else:
-        db.session.execute(delete(User).where(User.email == user.email))
+        db.session.execute(delete(User).where(User.username == user.username))
         db.session.commit()
         return jsonify({
             "msg": "Account deleted suscessfully"
@@ -188,9 +188,70 @@ def backlog():
             return jsonify({
                 "msg": "Game deleted suscessfully from backlog of user."
             }), 200
+        }), 200
 
 
-# this only runs if `$ python src/main.py` is executed
-if __name__ == '__main__':
-    PORT = int(os.environ.get('PORT', 3001))
-    app.run(host='0.0.0.0', port=PORT, debug=True)
+@ app.route('/backlog', methods=['POST', 'PUT', 'DELETE'])
+@ jwt_required()
+        def backlog():
+        current_user_identity = get_jwt_identity()
+        user = db.session.execute(select(User).where(
+        User.email == current_user_identity)).first()
+
+        if not user:
+        return jsonify({"msg": "User not found"}), 404
+
+        match request.method:
+        case "POST":
+        game_id = request.json.get(game_id)
+            user_id= request.json.get(user_id)
+            existing_game= db.session.query.select(
+                (BacklogList).where(BacklogList.game_id == game_id and BacklogList.user_id == user_id)).first()
+            if existing_game:
+                return jsonify({"msg": "Game already in backlog of user"}), 409
+
+            new_backlog_entry= BacklogList(
+                game_id=game_id,
+                status="Not started",
+                user_id=user_id,
+        )
+            db.session.add(new_backlog_entry)
+            db.session.commit()
+
+            return jsonify({
+               "msg": "Game added succesfully to the user's backlog."
+            }), 200
+            case "PUT":
+            game_id= request.json.get(game_id)
+            user_id= request.json.get(user_id)
+            change= request.json.get(change)
+            match change:
+            case "status":
+            status = request.json.get(status)
+                    db.session.execute(update(BacklogList).where(
+                       BacklogList.user_id == user_id and BacklogList.game_id == game_id).values(status=status))
+                        db.session.commit()
+                        return jsonify({
+                        "msg": "Game status succesfully edited from backlog of user."
+                    }), 200
+                    case "rating":
+                    rating= request.json.get(rating)
+                    db.session.execute(update(BacklogList).where(
+                       BacklogList.user_id == user_id and BacklogList.game_id == game_id).values(rating=rating))
+                        db.session.commit()
+                        return jsonify({
+                        "msg": "Game rating succesfully edited from backlog of user."
+                    }), 200
+                    case "DELETE":
+                    db.session.execute(delete(BacklogList).where(
+                BacklogList.user_id == user_id and BacklogList.game_id == BacklogList.game_id))
+                db.session.commit()
+                return jsonify({
+                "msg": "Game deleted suscessfully from backlog of user."
+            }), 200
+
+
+            # this only runs if `$ python src/main.py` is executed
+            if __name__ == '__main__':
+            PORT = int(os.environ.get('PORT', 3001))
+            app.run(host='0.0.0.0', port=PORT, debug=True)
