@@ -53,7 +53,7 @@ def signup():
 
 
 @api.route('/backlog/<username>', methods=['GET'])
-def users(username):
+def backlog(username):
     user_id = db.session.execute(
         select(User.id).where(User.username == username)).first()
     backlog = db.session.execute(select(BacklogList).where(
