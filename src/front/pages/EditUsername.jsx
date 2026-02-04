@@ -1,13 +1,11 @@
-import { Link, useParams } from "react-router-dom";  // To use link for navigation and useParams to get URL parameters
+import { Link, useParams, useNavigate } from "react-router-dom";  // To use link for navigation and useParams to get URL parameters
 import useGlobalReducer from "../hooks/useGlobalReducer";  // Import a custom hook for accessing the global state
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-
 
 export const Edit = () => {
-
     const navigate = useNavigate();
     const usernameToEdit = useParams();
+    const { store } = useGlobalReducer();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");

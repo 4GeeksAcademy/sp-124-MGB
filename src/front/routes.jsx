@@ -1,5 +1,4 @@
 // Import necessary components and functions from react-router-dom.
-
 import {
   createBrowserRouter,
   createRoutesFromElements,
@@ -10,7 +9,10 @@ import { Home } from "./pages/Home";
 import { Signup } from "./pages/Signup";
 import { Users } from "./pages/Users"
 import { Login } from "./pages/Login"
-import { Edit } from "./pages/Edit"
+import { Edit } from "./pages/EditUsername"
+import { Games } from "./pages/Games"
+import { AddGames } from "./pages/AddGames";
+import { EditGame } from "./pages/EditGame"
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -28,7 +30,10 @@ export const router = createBrowserRouter(
       <Route path="/signup" element={<Signup />} />  {/* Dynamic route for single items */}
       <Route path="/login" element={<Login />} />
       <Route path="/users" element={<Users />} />
+      <Route path="/games" element={<Games />} />
+      <Route path="/games/add" element={<AddGames />} />
       <Route path="/edit/:username" element={<Edit />} />
+      <Route path="/games/edit/:name" element={<EditGame />} />
     </Route>
   )
 );

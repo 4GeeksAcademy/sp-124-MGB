@@ -33,6 +33,35 @@ class User(db.Model):
         }
 
 
+class Games(db.Model):
+    __tablename__ = "games"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(), nullable=False)
+    description: Mapped[str] = mapped_column(String(), nullable=False)
+    genres: Mapped[str] = mapped_column(String(), nullable=False)
+    publisher: Mapped[str] = mapped_column(String(), nullable=False)
+    developer: Mapped[str] = mapped_column(String(), nullable=False)
+    cover_link: Mapped[str] = mapped_column(String(), nullable=True)
+    release_date: Mapped[str] = mapped_column(String(), nullable=False)
+
+    game_id_reviews: Mapped[List["Reviews"]
+                            ] = relationship(back_populates="game")
+    game_id_backlog: Mapped[List["BacklogList"]
+                            ] = relationship(back_populates="game")
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
+            "genres": self.genres,
+            "publisher": self.publisher,
+            "developer": self.developer,
+            "cover_link": self.cover_link,
+            "release_date": self.release_date
+        }
+
+
 class Reviews(db.Model):
     __tablename__ = "reviews"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -40,8 +69,11 @@ class Reviews(db.Model):
     game_id: Mapped[int] = mapped_column(nullable=False)
     user_id: Mapped[int] = mapped_column(
         ForeignKey("user.id"), nullable=False)
+    game_id: Mapped[int] = mapped_column(
+        ForeignKey("games.id"), nullable=False)
 
     user: Mapped["User"] = relationship(back_populates="user_id_reviews")
+    game: Mapped["Games"] = relationship(back_populates="game_id_reviews")
 
     def serialize(self):
         return {
@@ -55,13 +87,15 @@ class Reviews(db.Model):
 class BacklogList(db.Model):
     __tablename__ = "backloglist"
     id: Mapped[int] = mapped_column(primary_key=True)
-    game_id: Mapped[int] = mapped_column(nullable=False)
     rating: Mapped[float] = mapped_column(Float(), nullable=True)
     status: Mapped[str] = mapped_column(String(), nullable=False)
     user_id: Mapped[int] = mapped_column(
         ForeignKey("user.id"), nullable=False)
+    game_id: Mapped[int] = mapped_column(
+        ForeignKey("games.id"), nullable=False)
 
     user: Mapped["User"] = relationship(back_populates="user_id_backlog")
+    game: Mapped["Games"] = relationship(back_populates="game_id_backlog")
 
     def serialize(self):
         return {
