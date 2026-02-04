@@ -190,66 +190,6 @@ def backlog():
             }), 200
 
 
-@app.route('/backlog', methods=['POST', 'PUT', 'DELETE'])
-@jwt_required()
-def backlog():
-    current_user_identity = get_jwt_identity()
-    user = db.session.execute(select(User).where(
-        User.email == current_user_identity)).first()
-
-    if not user:
-        return jsonify({"msg": "User not found"}), 404
-
-    match request.method:
-        case "POST":
-            game_id = request.json.get(game_id)
-            user_id = request.json.get(user_id)
-            existing_game = db.session.query.select(
-                (BacklogList).where(BacklogList.game_id == game_id and BacklogList.user_id == user_id)).first()
-            if existing_game:
-                return jsonify({"msg": "Game already in backlog of user"}), 409
-
-            new_backlog_entry = BacklogList(
-                game_id=game_id,
-                status="Not started",
-                user_id=user_id,
-            )
-            db.session.add(new_backlog_entry)
-            db.session.commit()
-
-            return jsonify({
-                "msg": "Game added succesfully to the user's backlog."
-            }), 200
-        case "PUT":
-            game_id = request.json.get(game_id)
-            user_id = request.json.get(user_id)
-            change = request.json.get(change)
-            match change:
-                case "status":
-                    status = request.json.get(status)
-                    db.session.execute(update(BacklogList).where(
-                        BacklogList.user_id == user_id and BacklogList.game_id == game_id).values(status=status))
-                    db.session.commit()
-                    return jsonify({
-                        "msg": "Game status succesfully edited from backlog of user."
-                    }), 200
-                case "rating":
-                    rating = request.json.get(rating)
-                    db.session.execute(update(BacklogList).where(
-                        BacklogList.user_id == user_id and BacklogList.game_id == game_id).values(rating=rating))
-                    db.session.commit()
-                    return jsonify({
-                        "msg": "Game rating succesfully edited from backlog of user."
-                    }), 200
-        case "DELETE":
-            db.session.execute(delete(BacklogList).where(
-                BacklogList.user_id == user_id and BacklogList.game_id == BacklogList.game_id))
-            db.session.commit()
-            return jsonify({
-                "msg": "Game deleted suscessfully from backlog of user."
-            }), 200
-
-
     # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3001))
