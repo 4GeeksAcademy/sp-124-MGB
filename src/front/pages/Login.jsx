@@ -21,13 +21,8 @@ export const Login = () => {
 
             const data = await res.json();
 
-            dispatch({
-                type: "login",
-                payload: {
-                    token: data.token,
-                    email: data.email
-                }
-            })
+            localStorage.setItem("token", data.token)
+            localStorage.setItem("email", data.email)
 
             if (!res.ok) {
                 return data.msg;
