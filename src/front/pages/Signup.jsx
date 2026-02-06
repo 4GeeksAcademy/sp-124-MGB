@@ -1,10 +1,8 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Link, useParams } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 export const Signup = () => {
     const navigate = useNavigate();
-
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [username, setUsername] = useState("");
@@ -25,7 +23,7 @@ export const Signup = () => {
             if (!res.ok) {
                 return data.msg;
             }
-            navigate("/")
+            navigate("/users")
 
         } catch (err) {
 

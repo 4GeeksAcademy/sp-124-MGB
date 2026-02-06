@@ -4,33 +4,34 @@ import useGlobalReducer from "../hooks/useGlobalReducer";  // Import a custom ho
 import { useEffect, useState } from "react";
 
 // Define and export the Single component which displays individual item details.
-export const Users = () => {
+export const Games = () => {
     // Access the global state using the custom hook.
     const { store } = useGlobalReducer();
     const [data, setData] = useState(null);
     const [changes, setChanges] = useState(false)
+    const backendUrl = import.meta.env.VITE_BACKEND_URL
     const handleFetch = async () => {
         try {
             const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
             if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
 
-            const response = await fetch(backendUrl + "api/users");
+            const response = await fetch(backendUrl + "api/games");
             const datajson = await response.json();
             if (response.ok) {
-                setData(datajson.users);
+                setData(datajson.games);
             }
         } catch (err) { }
     }
 
-    const handleDelete = async (username) => {
+    const handleDelete = async (name) => {
         try {
-            const res = await fetch(backendUrl + `profiles/settings`, {
+            const res = await fetch(backendUrl + `api/games`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ username })
+                body: JSON.stringify({ name })
             });
 
             const data = await res.json();
@@ -59,17 +60,18 @@ export const Users = () => {
         <div className="container text-center">
             <ul>
                 {data.map((item, index) => <li key={index}>
-                    Username: {item.username} Email: {item.email}
-                    <Link to={`/edit/${item.username}`}><button >Edit</button></Link>
-                    <Link to={`/profiles/${item.username}`}><button >Profile</button></Link>
-                    <button onClick={() => handleDelete(item.username)} >Delete</button>
+                    Game: {item.name} description: {item.description}
+                    genres: {item.genres} publisher: {item.publisher}
+                    developer: {item.developer} cover_link: {item.cover_link}
+                    release date: {item.release_date}
+                    <Link to={`/games/edit/${item.name}`}><button >Edit</button></Link>
+                    <button onClick={() => handleDelete(item.name)} >Delete</button>
                 </li>)}
             </ul>
-            <Link to="/signup">
-                <button className="btn btn-primary btn-lg" href="#">Signup</button>
-            </Link>
-            <Link to="/login">
-                <button className="btn btn-primary btn-lg" href="#">Login</button>
+            <Link to="/games/add">
+                <span className="btn btn-primary btn-lg" href="#" role="button">
+                    Add Game
+                </span>
             </Link>
             <Link to="/">
                 <span className="btn btn-primary btn-lg" href="#" role="button">

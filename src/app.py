@@ -2,21 +2,18 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 import os
-from flask import Flask, request, jsonify, url_for, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, JWTManager
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
 from sqlalchemy import delete, update, select
-from sqlalchemy import delete, update, select
 from api.utils import APIException, generate_sitemap
-from api.models import BacklogList, User, db
 from api.models import BacklogList, User, db
 from api.routes import api
 from api.admin import setup_admin
 from api.commands import setup_commands
-from flask_jwt_extended import create_access_token
-from flask_jwt_extended import JWTManager
+
 # from models import Person
 
 ENV = "development" if os.getenv("FLASK_DEBUG") == "1" else "production"
@@ -132,7 +129,7 @@ def profile_handle():
 
 @app.route('/backlog', methods=['POST', 'PUT', 'DELETE'])
 @jwt_required()
-def backlog():
+def backlog_auth_req():
     current_user_identity = get_jwt_identity()
     user = db.session.execute(select(User).where(
         User.email == current_user_identity)).first()
@@ -188,7 +185,6 @@ def backlog():
             return jsonify({
                 "msg": "Game deleted suscessfully from backlog of user."
             }), 200
-
 
     # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':

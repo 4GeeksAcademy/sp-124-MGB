@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Link, useParams } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import useGlobalReducer from "../hooks/useGlobalReducer"
+
 export const Login = () => {
     const navigate = useNavigate();
-
+    const { store } = useGlobalReducer();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
