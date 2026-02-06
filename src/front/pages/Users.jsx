@@ -61,6 +61,7 @@ export const Users = () => {
                 {data.map((item, index) => <li key={index}>
                     Username: {item.username} Email: {item.email}
                     <Link to={`/edit/${item.username}`}><button >Edit</button></Link>
+                    <Link to={`/profiles/${item.username}`}><button >Profile</button></Link>
                     <button onClick={() => handleDelete(item.username)} >Delete</button>
                 </li>)}
             </ul>

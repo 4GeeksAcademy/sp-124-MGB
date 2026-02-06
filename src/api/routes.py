@@ -145,11 +145,16 @@ def games():
 @api.route('/backlog/<username>', methods=['GET'])
 def backlog(username):
     user_id = db.session.execute(
-        select(User.id).where(User.username == username)).first()
+        select(User.id).where(User.username == username)).scalar()
     backlog = db.session.execute(select(BacklogList).where(
-        BacklogList.user_id == user_id)).first()
+        BacklogList.user_id == user_id)).scalars().all()
+    games_info = []
+    for i in backlog:
+        games_info.add(db.session.execute(
+            select(Games).where(Games.id == i.game_id)))
     response_body = {
-        "backlog": list(map(lambda backlog: backlog.serialize(), backlog))
+        "backlog": list(map(lambda backlog: backlog.serialize(), backlog)),
+        "games": list(map(lambda games_info: games_info.serialize(), games_info))
     }
 
     return jsonify(response_body), 200

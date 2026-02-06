@@ -13,13 +13,13 @@ export const Edit = () => {
     const handleEdit = async (e) => {
         e.preventDefault();
         if (username != "") {
-            fetchData(usernameToEdit, username);
+            fetchData(usernameToEdit.username, username);
         }
         if (email != "") {
-            fetchData(usernameToEdit, email);
+            fetchData(usernameToEdit.username, email);
         }
         if (password != "") {
-            fetchData(usernameToEdit, password);
+            fetchData(usernameToEdit.username, password);
         }
     }
     const fetchData = async (username, dataToFetch) => {

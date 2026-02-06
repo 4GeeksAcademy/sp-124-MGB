@@ -9,10 +9,11 @@ import { Home } from "./pages/Home";
 import { Signup } from "./pages/Signup";
 import { Users } from "./pages/Users"
 import { Login } from "./pages/Login"
-import { Edit } from "./pages/EditUsername"
+import { Edit } from "./pages/EditUser"
 import { Games } from "./pages/Games"
 import { AddGames } from "./pages/AddGames";
 import { EditGame } from "./pages/EditGame"
+import { UserProfile } from "./pages/UserProfile";
 
 export const router = createBrowserRouter(
   createRoutesFromElements(
@@ -34,6 +35,7 @@ export const router = createBrowserRouter(
       <Route path="/games/add" element={<AddGames />} />
       <Route path="/edit/:username" element={<Edit />} />
       <Route path="/games/edit/:name" element={<EditGame />} />
+      <Route path="/profiles/:username" element={<UserProfile />} />
     </Route>
   )
 );
