@@ -24,14 +24,32 @@ export const Games = () => {
         } catch (err) { }
     }
 
-    const handleDelete = async (name) => {
+    const handleAdmin = async () => {
+        try {
+            const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+            if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
+
+            const response = await fetch(backendUrl + "admin", {
+                headers: {
+                    "Authorization": "Bearer " + localStorage.getItem("token")
+                }
+            });
+            const datajson = await response.json();
+            if (response.ok) {
+                return datajson.msg
+            }
+        } catch (err) { }
+    }
+
+    const handleDelete = async (game_id) => {
         try {
             const res = await fetch(backendUrl + `api/games`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ name })
+                body: JSON.stringify({ game_id })
             });
 
             const data = await res.json();
@@ -45,6 +63,30 @@ export const Games = () => {
         }
     }
 
+    const handleAddGames = async (game_id) => {
+
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}backlog`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + localStorage.getItem("token")
+                },
+                body: JSON.stringify({ game_id })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                return data.msg;
+            }
+
+        } catch (err) {
+
+        }
+    };
+
+
     useEffect(() => {
         handleFetch();
     }, [])
@@ -54,7 +96,54 @@ export const Games = () => {
         setChanges(false)
     }, [changes])
 
-    if (!data) return <p>Loading ...</p>;
+    if (!localStorage.getItem("token")) {
+
+        return (
+            <div className="container text-center">
+                <ul>
+                    {data.map((item, index) => <li key={index}>
+                        Game: {item.name} description: {item.description}
+                        genres: {item.genres} publisher: {item.publisher}
+                        developer: {item.developer} cover_link: {item.cover_link}
+                    </li>)}
+                </ul>
+                <Link to="/">
+                    <span className="btn btn-primary btn-lg" href="#" role="button">
+                        Back home
+                    </span>
+                </Link>
+            </div>
+        );
+    }
+
+    if (handleAdmin) {
+
+        return (
+            <div className="container text-center">
+                <ul>
+                    {data.map((item, index) => <li key={index}>
+                        Game: {item.name} description: {item.description}
+                        genres: {item.genres} publisher: {item.publisher}
+                        developer: {item.developer} cover_link: {item.cover_link}
+                        release date: {item.release_date}
+                        <button onClick={() => handleAddGames(item.id)} >Add to backlog</button>
+                        <Link to={`/games/edit/${item.name}`}><button >Edit</button></Link>
+                        <button onClick={() => handleDelete(item.id)} >Delete</button>
+                    </li>)}
+                </ul>
+                <Link to="/games/add">
+                    <span className="btn btn-primary btn-lg" href="#" role="button">
+                        Add Game
+                    </span>
+                </Link>
+                <Link to="/">
+                    <span className="btn btn-primary btn-lg" href="#" role="button">
+                        Back home
+                    </span>
+                </Link>
+            </div>
+        );
+    }
 
     return (
         <div className="container text-center">
@@ -64,15 +153,9 @@ export const Games = () => {
                     genres: {item.genres} publisher: {item.publisher}
                     developer: {item.developer} cover_link: {item.cover_link}
                     release date: {item.release_date}
-                    <Link to={`/games/edit/${item.name}`}><button >Edit</button></Link>
-                    <button onClick={() => handleDelete(item.name)} >Delete</button>
+                    <button onClick={() => handleAddGames(item.id)} >Add to backlog</button>
                 </li>)}
             </ul>
-            <Link to="/games/add">
-                <span className="btn btn-primary btn-lg" href="#" role="button">
-                    Add Game
-                </span>
-            </Link>
             <Link to="/">
                 <span className="btn btn-primary btn-lg" href="#" role="button">
                     Back home
@@ -80,4 +163,7 @@ export const Games = () => {
             </Link>
         </div>
     );
+
+
+
 };

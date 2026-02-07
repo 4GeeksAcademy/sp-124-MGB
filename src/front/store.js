@@ -10,14 +10,12 @@ export default function storeReducer(store, action = {}) {
     case "login":
       return {
         ...store,
-        token: action.payload.token,
         email: action.payload.email,
       };
 
     case "logout":
       return {
         ...store,
-        token: null,
         email: null,
       };
   }
