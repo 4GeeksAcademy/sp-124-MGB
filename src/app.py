@@ -9,7 +9,7 @@ from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt, check_password_hash
 from sqlalchemy import delete, update, select
 from api.utils import APIException, generate_sitemap
-from api.models import BacklogList, Games, User, db
+from api.models import BacklogList, Games, Reviews, User, db
 from api.routes import api
 from api.admin import setup_admin
 from api.commands import setup_commands
@@ -296,7 +296,7 @@ def backlog_handle():
 
     match request.method:
         case "POST":
-            game_id = request.json.get(game_id)
+            game_id = request.json.get("game_id")
             existing_game = db.session.query.select(
                 (BacklogList).where(BacklogList.game_id == game_id and BacklogList.user_id == user.id)).first()
             if existing_game:
@@ -314,11 +314,11 @@ def backlog_handle():
                 "msg": "Game added succesfully to the user's backlog."
             }), 200
         case "PUT":
-            game_id = request.json.get(game_id)
+            game_id = request.json.get("game_id")
             change = request.json.get(change)
             match change:
                 case "status":
-                    status = request.json.get(status)
+                    status = request.json.get("status")
                     db.session.execute(update(BacklogList).where(
                         BacklogList.user_id == user.id and BacklogList.game_id == game_id).values(status=status))
                     db.session.commit()
@@ -326,7 +326,7 @@ def backlog_handle():
                         "msg": "Game status succesfully edited from backlog of user."
                     }), 200
                 case "rating":
-                    rating = request.json.get(rating)
+                    rating = request.json.get("rating")
                     db.session.execute(update(BacklogList).where(
                         BacklogList.user_id == user.id and BacklogList.game_id == game_id).values(rating=rating))
                     db.session.commit()
@@ -341,6 +341,53 @@ def backlog_handle():
                 "msg": "Game deleted suscessfully from backlog of user."
             }), 200
 
+
+@app.route('/reviews', methods=['POST', 'PUT', 'DELETE'])
+@jwt_required()
+def reviews_handle():
+    current_user_identity = get_jwt_identity()
+    user = db.session.execute(select(User).where(
+        User.email == current_user_identity)).first()
+
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
+
+    match request.method:
+        case "POST":
+            game_id = request.json.get("game_id")
+            existing_game = db.session.query.select(
+                (BacklogList).where(BacklogList.game_id == game_id and BacklogList.user_id == user.id)).first()
+            if not existing_game:
+                return jsonify({"msg": "Game does not exist"}), 401
+
+            new_review = Reviews(
+                game_id=game_id,
+                review_text=request.json.get("review"),
+                user_id=user.id,
+            )
+            db.session.add(new_review)
+            db.session.commit()
+
+            return jsonify({
+                "msg": "Review added succesfully to the game."
+            }), 200
+        case "PUT":
+            game_id = request.json.get("game_id")
+            review = request.json.get("review")
+            db.session.execute(update(Reviews).where(
+                Reviews.user_id == user.id and Reviews.game_id == game_id).values(review_text=review))
+            db.session.commit()
+            return jsonify({
+                "msg": "Game review succesfully edited."
+            }), 200
+        case "DELETE":
+            game_id = request.json.get("game_id")
+            db.session.execute(delete(Reviews).where(
+                Reviews.user_id == user.id and Reviews.game_id == game_id))
+            db.session.commit()
+            return jsonify({
+                "msg": "Review deleted suscessfully from game."
+            }), 200
 
     # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':

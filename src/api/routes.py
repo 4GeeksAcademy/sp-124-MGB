@@ -3,7 +3,7 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 """
 from sqlalchemy import select
 from flask import request, jsonify, Blueprint
-from api.models import db, User, BacklogList, Games
+from api.models import Reviews, db, User, BacklogList, Games
 from flask_cors import CORS
 
 api = Blueprint('api', __name__)
@@ -45,6 +45,17 @@ def backlog(username):
     response_body = {
         "backlog": list(map(lambda backlog: backlog.serialize(), backlog)),
         "games": list(map(lambda games_info: games_info.serialize(), games_info))
+    }
+
+    return jsonify(response_body), 200
+
+
+@api.route('/reviews/<int:id>', methods=['GET'])
+def reviews(id):
+    reviews = db.session.execute(select(Reviews).where(
+        Reviews.game_id == id)).scalars().all()
+    response_body = {
+        "reviews": list(map(lambda reviews: reviews.serialize(), reviews))
     }
 
     return jsonify(response_body), 200

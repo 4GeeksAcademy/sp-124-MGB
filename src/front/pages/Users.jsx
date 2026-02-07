@@ -56,7 +56,7 @@ export const Users = () => {
         setChanges(false)
     }, [changes])
 
-    if (!data) return <p>Loading ...</p>;
+    if (!data) return <p>YOU SHOULD NOT BE HERE, AWAYYYYY</p>;
 
     return (
         <div className="container text-center">

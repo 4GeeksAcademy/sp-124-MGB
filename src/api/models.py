@@ -66,7 +66,6 @@ class Reviews(db.Model):
     __tablename__ = "reviews"
     id: Mapped[int] = mapped_column(primary_key=True)
     review_text: Mapped[str] = mapped_column(String(), nullable=False)
-    game_id: Mapped[int] = mapped_column(nullable=False)
     user_id: Mapped[int] = mapped_column(
         ForeignKey("user.id"), nullable=False)
     game_id: Mapped[int] = mapped_column(
