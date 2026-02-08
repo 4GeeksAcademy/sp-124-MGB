@@ -8,16 +8,15 @@ export const UserProfile = () => {
     // Access the global state using the custom hook.
     const { store } = useGlobalReducer();
     const username = useParams()
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const [backlog, setBacklog] = useState([]);
     const [gamesinfo, setGamesinfo] = useState([]);
     const [changes, setChanges] = useState(false)
     const handleFetch = async () => {
         try {
-            const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
             if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
 
-            const response = await fetch(backendUrl + "api/backlog/" + username);
+            const response = await fetch(backendUrl + "api/backlog/" + username.username);
             const datajson = await response.json();
             if (response.ok) {
                 setBacklog(datajson.backlog);

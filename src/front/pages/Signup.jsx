@@ -6,11 +6,11 @@ export const Signup = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [username, setUsername] = useState("");
-
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const handleSignup = async (e) => {
         e.preventDefault();
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}api/signup`, {
+            const res = await fetch(`${backendUrl}signup`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -23,7 +23,7 @@ export const Signup = () => {
             if (!res.ok) {
                 return data.msg;
             }
-            navigate("/users")
+            navigate("/")
 
         } catch (err) {
 

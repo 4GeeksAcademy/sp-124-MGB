@@ -7,13 +7,12 @@ import { useEffect, useState } from "react";
 export const Games = () => {
     // Access the global state using the custom hook.
     const { store } = useGlobalReducer();
-    const [data, setData] = useState(null);
-    const [changes, setChanges] = useState(false)
+    const [data, setData] = useState([]);
+    const [admin, setAdmin] = useState();
+    const [changes, setChanges] = useState(false);
     const backendUrl = import.meta.env.VITE_BACKEND_URL
     const handleFetch = async () => {
         try {
-            const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
             if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
 
             const response = await fetch(backendUrl + "api/games");
@@ -26,8 +25,6 @@ export const Games = () => {
 
     const handleAdmin = async () => {
         try {
-            const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
             if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
 
             const response = await fetch(backendUrl + "admin", {
@@ -35,10 +32,14 @@ export const Games = () => {
                     "Authorization": "Bearer " + localStorage.getItem("token")
                 }
             });
+            console.log("a")
             const datajson = await response.json();
             if (response.ok) {
-                return datajson.msg
+                setAdmin(datajson.msg);
+                return
             }
+            setAdmin(false);
+            return
         } catch (err) { }
     }
 
@@ -64,9 +65,8 @@ export const Games = () => {
     }
 
     const handleAddGames = async (game_id) => {
-
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}backlog`, {
+            const res = await fetch(backendUrl + "backlog", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -89,6 +89,7 @@ export const Games = () => {
 
     useEffect(() => {
         handleFetch();
+        handleAdmin()
     }, [])
 
     useEffect(() => {
@@ -105,6 +106,7 @@ export const Games = () => {
                         Game: {item.name} description: {item.description}
                         genres: {item.genres} publisher: {item.publisher}
                         developer: {item.developer} cover_link: {item.cover_link}
+                        <Link to={`/games/${item.name}/${item.id}`}><button >Details</button></Link>
                     </li>)}
                 </ul>
                 <Link to="/">
@@ -116,8 +118,7 @@ export const Games = () => {
         );
     }
 
-    if (handleAdmin) {
-
+    if (admin) {
         return (
             <div className="container text-center">
                 <ul>
@@ -127,6 +128,7 @@ export const Games = () => {
                         developer: {item.developer} cover_link: {item.cover_link}
                         release date: {item.release_date}
                         <button onClick={() => handleAddGames(item.id)} >Add to backlog</button>
+                        <Link to={`/games/${item.name}/${item.id}`}><button >Details</button></Link>
                         <Link to={`/games/edit/${item.name}`}><button >Edit</button></Link>
                         <button onClick={() => handleDelete(item.id)} >Delete</button>
                     </li>)}
@@ -154,6 +156,7 @@ export const Games = () => {
                     developer: {item.developer} cover_link: {item.cover_link}
                     release date: {item.release_date}
                     <button onClick={() => handleAddGames(item.id)} >Add to backlog</button>
+                    <Link to={`/games/${item.name}/${item.id}`}><button >Details</button></Link>
                 </li>)}
             </ul>
             <Link to="/">
