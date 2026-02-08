@@ -32,6 +32,16 @@ def games():
     return jsonify(response_body), 200
 
 
+@api.route('/games/<int:id>/<name>', methods=['GET'])
+def game_details(id, name):
+    games = db.session.execute(select(Games).where(Games.id == id)).scalar()
+    response_body = {
+        "game": games.serialize()
+    }
+
+    return jsonify(response_body), 200
+
+
 @api.route('/backlog/<username>', methods=['GET'])
 def backlog(username):
     user_id = db.session.execute(
@@ -45,6 +55,23 @@ def backlog(username):
     response_body = {
         "backlog": list(map(lambda backlog: backlog.serialize(), backlog)),
         "games": list(map(lambda games_info: games_info.serialize(), games_info))
+    }
+
+    return jsonify(response_body), 200
+
+
+@api.route('/backlog/<int:id>', methods=['GET'])
+def rating_handle(id):
+    ratings = db.session.execute(select(BacklogList.rating).where(
+        BacklogList.game_id == id)).scalars().all()
+    rating = 0
+
+    for i in ratings:
+        rating += i
+
+    rating = rating / ratings.length()
+    response_body = {
+        "rating": rating,
     }
 
     return jsonify(response_body), 200
