@@ -348,13 +348,12 @@ def reviews_handle():
     current_user_identity = get_jwt_identity()
     user = db.session.execute(select(User).where(
         User.email == current_user_identity)).first()
-
+    game_id = request.json.get("game_id")
     if not user:
         return jsonify({"msg": "User not found"}), 404
-
     match request.method:
         case "POST":
-            game_id = request.json.get("game_id")
+            review = request.json.get("review")
             existing_game = db.session.query.select(
                 (BacklogList).where(BacklogList.game_id == game_id and BacklogList.user_id == user.id)).first()
             if not existing_game:
@@ -372,7 +371,6 @@ def reviews_handle():
                 "msg": "Review added succesfully to the game."
             }), 200
         case "PUT":
-            game_id = request.json.get("game_id")
             review = request.json.get("review")
             db.session.execute(update(Reviews).where(
                 Reviews.user_id == user.id and Reviews.game_id == game_id).values(review_text=review))
@@ -381,7 +379,6 @@ def reviews_handle():
                 "msg": "Game review succesfully edited."
             }), 200
         case "DELETE":
-            game_id = request.json.get("game_id")
             db.session.execute(delete(Reviews).where(
                 Reviews.user_id == user.id and Reviews.game_id == game_id))
             db.session.commit()
