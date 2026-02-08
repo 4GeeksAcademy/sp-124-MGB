@@ -81,7 +81,7 @@ def serve_any_other_file(path):
 @jwt_required()
 def admin_check():
     current_user_identity = get_jwt_identity()
-    if (db.session.execute(select(User.is_admin).where(User.email == current_user_identity))):
+    if (db.session.execute(select(User.is_admin).where(User.email == current_user_identity)).scalar()):
         response_body = {
             "msg": True
         }
@@ -124,7 +124,7 @@ def signup():
         password=pw_hash,
         username=username,
         is_active=True,
-        is_admin=True
+        is_admin=False
     )
 
     db.session.add(new_user)
@@ -289,7 +289,7 @@ def games_handle():
 def backlog_handle():
     current_user_identity = get_jwt_identity()
     user = db.session.execute(select(User).where(
-        User.email == current_user_identity)).first()
+        User.email == current_user_identity)).scalar_one_or_none()
 
     if not user:
         return jsonify({"msg": "User not found"}), 404
@@ -297,8 +297,8 @@ def backlog_handle():
     match request.method:
         case "POST":
             game_id = request.json.get("game_id")
-            existing_game = db.session.query.select(
-                (BacklogList).where(BacklogList.game_id == game_id and BacklogList.user_id == user.id)).first()
+            existing_game = db.session.execute(select(BacklogList).where(
+                BacklogList.game_id == game_id and BacklogList.user_id == user.id)).first()
             if existing_game:
                 return jsonify({"msg": "Game already in backlog of user"}), 409
 

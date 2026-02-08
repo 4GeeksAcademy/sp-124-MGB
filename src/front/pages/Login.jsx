@@ -21,15 +21,15 @@ export const Login = () => {
 
             const data = await res.json();
 
-            localStorage.setItem("token", data.token)
-            localStorage.setItem("email", data.email)
-
             if (!res.ok) {
                 return data.msg;
             }
 
-            navigate("/")
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("email", data.email);
+            localStorage.setItem("username", username);
 
+            navigate("/")
         } catch (err) {
 
         }

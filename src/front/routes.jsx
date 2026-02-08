@@ -14,7 +14,7 @@ import { Games } from "./pages/Games"
 import { AddGames } from "./pages/AddGames";
 import { EditGame } from "./pages/EditGame"
 import { UserProfile } from "./pages/UserProfile";
-
+import { GameDetails } from "./pages/GameDetails";
 export const router = createBrowserRouter(
   createRoutesFromElements(
     // CreateRoutesFromElements function allows you to build route elements declaratively.
@@ -31,11 +31,12 @@ export const router = createBrowserRouter(
       <Route path="/signup" element={<Signup />} />  {/* Dynamic route for single items */}
       <Route path="/login" element={<Login />} />
       <Route path="/users" element={<Users />} />
+      <Route path="/edit/:username" element={<Edit />} />
+      <Route path="/profiles/:username" element={<UserProfile />} />
       <Route path="/games" element={<Games />} />
       <Route path="/games/add" element={<AddGames />} />
-      <Route path="/edit/:username" element={<Edit />} />
       <Route path="/games/edit/:name" element={<EditGame />} />
-      <Route path="/profiles/:username" element={<UserProfile />} />
+      <Route path="/games/:game_name/:game_id" element={<GameDetails />} />
     </Route>
   )
 );
