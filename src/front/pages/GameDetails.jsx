@@ -1,6 +1,5 @@
 // Import necessary hooks and components from react-router-dom and other libraries.
 import { Link, useParams } from "react-router-dom";  // To use link for navigation and useParams to get URL parameters
-import useGlobalReducer from "../hooks/useGlobalReducer";  // Import a custom hook for accessing the global state
 import { useEffect, useState } from "react";
 
 // Define and export the Single component which displays individual item details.
@@ -29,7 +28,7 @@ export const GameDetails = () => {
         try {
             if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
 
-            const response = await fetch(backendUrl + "backlog/" + game_id);
+            const response = await fetch(backendUrl + "api/backlog/" + game_id);
             const datajson = await response.json();
             if (response.ok) {
                 return datajson.rating
@@ -41,7 +40,7 @@ export const GameDetails = () => {
 
     const handleAddGames = async (game_id) => {
         try {
-            const res = await fetch(backendUrl + "backlog", {
+            const res = await fetch(backendUrl + "api/backlog", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

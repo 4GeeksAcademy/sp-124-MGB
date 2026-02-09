@@ -4,7 +4,7 @@ import useGlobalReducer from "../hooks/useGlobalReducer"
 
 export const AddGames = () => {
     const navigate = useNavigate();
-    const { store } = useGlobalReducer();
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [genres, setGenres] = useState("");
@@ -16,10 +16,11 @@ export const AddGames = () => {
     const handlePostGame = async (e) => {
         e.preventDefault();
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}api/games`, {
+            const res = await fetch(backendUrl + "api/games", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + localStorage.getItem("token")
                 },
                 body: JSON.stringify({
                     name, description, genres, publisher,

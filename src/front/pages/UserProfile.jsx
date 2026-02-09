@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 // Define and export the Single component which displays individual item details.
 export const UserProfile = () => {
     // Access the global state using the custom hook.
-    const { store } = useGlobalReducer();
     const username = useParams()
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const [backlog, setBacklog] = useState([]);
