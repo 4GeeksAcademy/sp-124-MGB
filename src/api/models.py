@@ -10,10 +10,11 @@ class User(db.Model):
     __tablename__ = "user"
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(
-        String(120), unique=True, nullable=False)
+        String(60), unique=True, nullable=False)
     username: Mapped[str] = mapped_column(
         String(15), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(120), nullable=False)
+    user_pfp_url: Mapped[str] = mapped_column(String(), nullable=True)
     is_admin: Mapped[bool] = mapped_column(nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean(), nullable=False)
 
@@ -29,6 +30,7 @@ class User(db.Model):
             "id": self.id,
             "email": self.email,
             "username": self.username,
+            "user_pfp_url": self.user_pfp_url
             # do not serialize the password, its a security breach
         }
 
