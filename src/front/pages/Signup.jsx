@@ -10,7 +10,7 @@ export const Signup = () => {
     const handleSignup = async (e) => {
         e.preventDefault();
         try {
-            const res = await fetch(`${backendUrl}signup`, {
+            const res = await fetch(backendUrl + "api/signup", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"

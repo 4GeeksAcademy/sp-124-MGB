@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 // Define and export the Single component which displays individual item details.
 export const Games = () => {
     // Access the global state using the custom hook.
-    const { store } = useGlobalReducer();
     const [data, setData] = useState([]);
     const [admin, setAdmin] = useState();
     const [changes, setChanges] = useState(false);
@@ -27,12 +26,11 @@ export const Games = () => {
         try {
             if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
 
-            const response = await fetch(backendUrl + "admin", {
+            const response = await fetch(backendUrl + "api/admin", {
                 headers: {
                     "Authorization": "Bearer " + localStorage.getItem("token")
                 }
             });
-            console.log("a")
             const datajson = await response.json();
             if (response.ok) {
                 setAdmin(datajson.msg);
@@ -45,10 +43,11 @@ export const Games = () => {
 
     const handleDelete = async (game_id) => {
         try {
-            const res = await fetch(backendUrl + `api/games`, {
+            const res = await fetch(backendUrl + "api/games", {
                 method: "DELETE",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + localStorage.getItem("token")
                 },
                 body: JSON.stringify({ game_id })
             });
@@ -66,7 +65,7 @@ export const Games = () => {
 
     const handleAddGames = async (game_id) => {
         try {
-            const res = await fetch(backendUrl + "backlog", {
+            const res = await fetch(backendUrl + "api/backlog", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

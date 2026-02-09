@@ -1,20 +1,20 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import useGlobalReducer from "../hooks/useGlobalReducer"
 
 export const Login = () => {
     const navigate = useNavigate();
-    const { store } = useGlobalReducer();
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}login`, {
+            const res = await fetch(backendUrl + "api/login", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+
                 },
                 body: JSON.stringify({ username, password })
             });

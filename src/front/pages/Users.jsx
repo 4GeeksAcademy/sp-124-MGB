@@ -6,14 +6,13 @@ import { useEffect, useState } from "react";
 // Define and export the Single component which displays individual item details.
 export const Users = () => {
     // Access the global state using the custom hook.
-    const { store } = useGlobalReducer();
     const [data, setData] = useState(null);
     const [changes, setChanges] = useState(false)
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const handleFetch = async () => {
         try {
             if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
-            const response = await fetch(backendUrl + "users", {
+            const response = await fetch(backendUrl + "api/users", {
                 method: "GET",
                 headers: {
                     "Authorization": "Bearer " + localStorage.getItem("token")
@@ -28,7 +27,7 @@ export const Users = () => {
 
     const handleDelete = async (username) => {
         try {
-            const res = await fetch(backendUrl + `profiles/settings`, {
+            const res = await fetch(backendUrl + `api/profiles/settings`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",

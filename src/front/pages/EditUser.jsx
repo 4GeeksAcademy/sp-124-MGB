@@ -5,7 +5,7 @@ import { useState } from "react";
 export const Edit = () => {
     const navigate = useNavigate();
     const usernameToEdit = useParams();
-    const { store } = useGlobalReducer();
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
@@ -24,7 +24,7 @@ export const Edit = () => {
     }
     const fetchData = async (username, dataToFetch) => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}profiles/settings`, {
+            const res = await fetch(backendUrl + "api/profiles/settings", {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",

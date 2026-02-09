@@ -1,12 +1,11 @@
 import { Link, useParams, useNavigate } from "react-router-dom";  // To use link for navigation and useParams to get URL parameters
-import useGlobalReducer from "../hooks/useGlobalReducer";  // Import a custom hook for accessing the global state
 import { useState } from "react";
 
 
 export const EditGame = () => {
     const navigate = useNavigate();
     const gameToEdit = useParams();
-    const { store } = useGlobalReducer();
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [genres, setGenres] = useState("");
@@ -41,10 +40,11 @@ export const EditGame = () => {
     }
     const fetchData = async (name, dataToFetch) => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}api/games`, {
+            const res = await fetch(backendUrl + "api/games", {
                 method: "PUT",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + localStorage.getItem("token")
                 },
                 body: JSON.stringify({ name, dataToFetch })
             });
