@@ -31,7 +31,9 @@ export const Games = () => {
                     "Authorization": "Bearer " + localStorage.getItem("token")
                 }
             });
+
             const datajson = await response.json();
+
             if (response.ok) {
                 setAdmin(datajson.msg);
                 return

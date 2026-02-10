@@ -9,8 +9,15 @@ export const GameDetails = () => {
     const game_name = params.game_name;
     const game_id = params.game_id;
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
+    const [changes, setChanges] = useState(false);
     const [gameInfo, setGameInfo] = useState({});
     const [reviews, setReviews] = useState([]);
+    const [admin, setAdmin] = useState(false);
+    const [review, setReview] = useState("");
+    const [posted, setPosted] = useState(false);
+    const [userReviewID, setUserReviewID] = useState();
+    const [reviewToDelete, setReviewToDelete] = useState()
+
     const handleFetch = async () => {
         try {
             if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
@@ -24,6 +31,49 @@ export const GameDetails = () => {
         } catch (err) { }
     }
 
+    const handleAdmin = async () => {
+        try {
+            if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
+
+            const response = await fetch(backendUrl + "api/admin", {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + localStorage.getItem("token")
+                }
+            });
+
+            const datajson = await response.json();
+
+            if (response.ok) {
+                setAdmin(datajson.msg);
+                return
+            }
+            setAdmin(false);
+            return
+        } catch (err) { }
+    }
+
+    const handleHasUserPostedReview = async () => {
+        try {
+            if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
+            const response = await fetch(backendUrl + "api/reviews/" + localStorage.getItem("email") + "/" + game_id, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+            const datajson = await response.json();
+            if (response.ok) {
+                setReview(datajson.review);
+                setPosted(datajson.msg);
+                setUserReviewID(datajson.id)
+                return
+            }
+            return
+        } catch (err) { console.log(err) }
+    }
+
     const handleRating = async () => {
         try {
             if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
@@ -33,7 +83,6 @@ export const GameDetails = () => {
             if (response.ok) {
                 return datajson.rating
             }
-
 
         } catch (err) { }
     }
@@ -60,28 +109,110 @@ export const GameDetails = () => {
         }
     };
 
-    const handleReviews = async () => {
-        try {
-            if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
+    const handleReviews = async (method) => {
+        switch (method) {
+            case "GET":
+                try {
+                    if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
 
-            const response = await fetch(backendUrl + "api/reviews/" + params.game_id);
-            const datajson = await response.json();
-            if (response.ok) {
-                setReviews(datajson.reviews)
-            }
+                    const response = await fetch(backendUrl + "api/reviews/" + game_id);
+                    const datajson = await response.json();
+                    if (response.ok) {
+                        setReviews(datajson.reviews)
+                    }
+                } catch (err) { }
+                break;
+            case "POST":
+                try {
+                    if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
 
+                    const res = await fetch(backendUrl + "api/reviews", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer " + localStorage.getItem("token")
+                        },
+                        body: JSON.stringify({ game_id, review })
+                    });
 
-        } catch (err) { }
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        return data.msg;
+                    }
+                    setChanges(true)
+                } catch (err) {
+                }
+                break;
+            case "PUT":
+                try {
+                    if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
+
+                    const res = await fetch(backendUrl + "api/reviews", {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer " + localStorage.getItem("token")
+                        },
+                        body: JSON.stringify({ game_id, review })
+                    });
+
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        return data.msg;
+                    }
+                    setChanges(true)
+                } catch (err) { }
+                break;
+            case "DELETE":
+                try {
+                    if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
+
+                    const res = await fetch(backendUrl + "api/reviews", {
+                        method: "DELETE",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer " + localStorage.getItem("token")
+                        },
+                        body: JSON.stringify({ reviewToDelete })
+                    });
+
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        return data.msg;
+                    }
+                    setChanges(true)
+                } catch (err) { }
+                break;
+        }
+
+    }
+
+    const removeButton = (id) => {
+        if (id == userReviewID) {
+            return <button onClick={() => { setReviewToDelete(id); handleReviews("DELETE") }}>Delete</button>
+        }
     }
 
     useEffect(() => {
         handleFetch();
+        handleAdmin();
+        handleHasUserPostedReview();
         handleRating();
+        handleReviews("GET");
     }, [])
+
+    useEffect(() => {
+        handleHasUserPostedReview();
+        handleReviews("GET");
+        setChanges(false);
+    }, [changes])
 
     if (!gameInfo) {
         return (
-            <p>a</p>
+            <p></p>
         )
     }
 
@@ -107,11 +238,43 @@ export const GameDetails = () => {
                         </li>)}
                     </ul>
                 </div>
-                <Link to="/games">
-                    <span className="btn btn-primary btn-lg" href="#" role="button">
-                        Games list
-                    </span>
-                </Link>
+            </div>
+        );
+    }
+    if (admin) {
+        return (
+            <div className="container text-center">
+                <div>
+                    <div>coverHere</div>
+                    <h1>{gameInfo.name}</h1>
+                    <h2>Genres: {gameInfo.genres}</h2>
+                    <h4>{gameInfo.release_date}</h4>
+                </div>
+                <div>
+                    <p>Description: {gameInfo.description}</p>
+                    <p>Publisher: {gameInfo.publisher}</p>
+                    <p>Developer: {gameInfo.developer}</p>
+                    <p>Rating: {handleRating}</p>
+                </div>
+                <button onClick={() => handleAddGames(game_id)} >Add to backlog</button>
+                <div>
+                    <p>Reviews:</p>
+                    <ul>
+                        {reviews.map((item) => <li key={item.id}>
+                            <p>{item.review_text}</p>
+                            <button onClick={() => { setReviewToDelete(item.id); handleReviews("DELETE") }} >Delete</button>
+                        </li>)}
+                    </ul>
+                </div>
+                <div>
+                    <form onSubmit={(e) => e.preventDefault()}>
+                        <div className="mb-3">
+                            <hr />
+                            <textarea className="form-control" id="review" rows="3" type="text" value={review} onChange={(e) => setReview(e.target.value)}></textarea>
+                        </div>
+                        <button type="submit" onClick={() => posted ? handleReviews("PUT") : handleReviews("POST")} className="btn btn-secondary">Post review</button>
+                    </form>
+                </div>
             </div>
         );
     }
@@ -131,11 +294,23 @@ export const GameDetails = () => {
                 <p>Rating: {handleRating}</p>
             </div>
             <button onClick={() => handleAddGames(game_id)} >Add to backlog</button>
-            <Link to="/games">
-                <span className="btn btn-primary btn-lg" href="#" role="button">
-                    Games list
-                </span>
-            </Link>
+            <div>
+                <ul>
+                    {reviews.map((item) => <li key={item.id}>
+                        <p>{item.review_text}</p>
+                        {removeButton(item.id)}
+                    </li>)}
+                </ul>
+            </div>
+            <div>
+                <form onSubmit={(e) => e.preventDefault()}>
+                    <div className="mb-3">
+                        <hr />
+                        <textarea className="form-control" id="review" rows="3" type="text" value={review} onChange={(e) => setReview(e.target.value)}></textarea>
+                    </div>
+                    <button type="submit" onClick={() => posted ? handleReviews("PUT") : handleReviews("POST")} className="btn btn-secondary">Post review</button>
+                </form>
+            </div>
         </div>
     );
 };
