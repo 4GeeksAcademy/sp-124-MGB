@@ -37,20 +37,20 @@ export const Login = () => {
 
     return (
         <div className="container mt-5">
-            <h2 className="display-6">Create account</h2>
+            <h2 className="display-6">Login</h2>
             <form onSubmit={handleLogin}>
                 <div className="mb-3 d-flex m-2 gap-2">
-                    <input className="form-control"
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
                     <input className="form-control"
                         type="username"
                         placeholder="Username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
+                    />
+                    <input className="form-control"
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                     />
                 </div>
                 <button type="submit" className="btn btn-secondary">Login</button>

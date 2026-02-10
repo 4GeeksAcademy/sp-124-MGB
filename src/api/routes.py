@@ -341,22 +341,24 @@ def rating_handle(id):
     return jsonify(response_body), 200
 
 
-@api.route('/reviews', methods=['POST', 'PUT', 'DELETE'])
+@api.route('/reviews', methods=["GET", 'POST', 'PUT', 'DELETE'])
 @jwt_required()
 def reviews_handle():
     current_user_identity = get_jwt_identity()
     user = db.session.execute(select(User).where(
-        User.email == current_user_identity)).first()
+        User.email == current_user_identity)).scalars().first()
     game_id = request.json.get("game_id")
+    existing_game = db.session.execute(
+        select(Games).where(Games.id == game_id)).scalars().first()
     if not user:
         return jsonify({"msg": "User not found"}), 404
     match request.method:
         case "POST":
             review = request.json.get("review")
-            existing_game = db.session.query.select(
-                (BacklogList).where(BacklogList.game_id == game_id and BacklogList.user_id == user.id)).first()
-            if not existing_game:
-                return jsonify({"msg": "Game does not exist"}), 401
+            existing_review = db.session.execute(select(Reviews).where(
+                Reviews.user_id == user.id and Reviews.game_id == game_id)).scalars().first()
+            if not existing_game or existing_review:
+                return jsonify({"msg": "Game does not exist or review already exists"}), 401
 
             new_review = Reviews(
                 game_id=game_id,
@@ -379,7 +381,7 @@ def reviews_handle():
             }), 200
         case "DELETE":
             db.session.execute(delete(Reviews).where(
-                Reviews.user_id == user.id and Reviews.game_id == game_id))
+                Reviews.id == request.json.get("reviewToDelete")))
             db.session.commit()
             return jsonify({
                 "msg": "Review deleted suscessfully from game."
@@ -393,5 +395,27 @@ def reviews(id):
     response_body = {
         "reviews": list(map(lambda reviews: reviews.serialize(), reviews))
     }
+
+    return jsonify(response_body), 200
+
+
+@api.route('/reviews/<user_email>/<int:game_id>', methods=['GET'])
+def user_review_check(user_email, game_id):
+    user_id = db.session.execute(select(User.id).where(
+        User.email == user_email)).scalars().first()
+    existing_review = db.session.execute(select(Reviews).where(
+        Reviews.user_id == user_id and Reviews.game_id == game_id)).scalar_one_or_none()
+    response_body = {
+        "msg": False,
+        "review": "",
+        "id": None
+    }
+
+    if existing_review:
+        response_body = {
+            "msg": True,
+            "review": existing_review.review_text,
+            "id": existing_review.id
+        }
 
     return jsonify(response_body), 200

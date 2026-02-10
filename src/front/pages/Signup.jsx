@@ -36,9 +36,10 @@ export const Signup = () => {
             <form onSubmit={handleSignup}>
                 <div className="mb-3 d-flex m-2 gap-2">
                     <input className="form-control"
-                        placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        type="username"
+                        placeholder="Username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
                     />
                     <input className="form-control"
                         type="password"
@@ -47,10 +48,9 @@ export const Signup = () => {
                         onChange={(e) => setPassword(e.target.value)}
                     />
                     <input className="form-control"
-                        type="username"
-                        placeholder="Username"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
                     />
                 </div>
                 <button type="submit" className="btn btn-secondary">Create account</button>
