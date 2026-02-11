@@ -8,9 +8,13 @@ from api.models import Reviews, db, User, BacklogList, Games
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt, check_password_hash
 
+
+# appending a path
 api = Blueprint('api', __name__)
 # Allow CORS requests to this API
 CORS(api)
+
+bcrypt = Bcrypt()
 
 
 @api.route('/admin', methods=['GET'])
@@ -54,7 +58,7 @@ def signup():
     if existing_email:
         return jsonify({"msg": "El email ya está registrado"}), 409
 
-    pw_hash = Bcrypt.generate_password_hash(password).decode('utf-8')
+    pw_hash = bcrypt.generate_password_hash(password).decode('utf-8')
     new_user = User(
         email=email,
         password=pw_hash,
