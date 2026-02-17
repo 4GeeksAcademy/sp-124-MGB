@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, desc, select, update
 from flask import request, jsonify, Blueprint
 from api.models import Reviews, db, User, BacklogList, Games
 from flask_cors import CORS
@@ -133,7 +133,8 @@ def profile_handle():
 
 @api.route('/games', methods=['GET'])
 def games():
-    games = db.session.execute(select(Games)).scalars().all()
+    games = db.session.execute(select(Games).order_by(
+        Games.name)).scalars().all()
     response_body = {
         "games": list(map(lambda games: games.serialize(), games))
     }
@@ -168,7 +169,6 @@ def games_handle():
                     release_date=release,
                     cover_link=cover_link
                 )
-
                 db.session.add(new_game)
                 db.session.commit()
 
@@ -176,42 +176,43 @@ def games_handle():
                     "msg": "Game added successfull."
                 }
             case "PUT":
+                game_id = request.json.get("game_id"),
                 game = db.session.execute(select(Games).where(
-                    Games.id == request.json.get("game_id", None))).scalars().first()
+                    Games.id == game_id)).scalars().first()
 
                 if not game:
                     return jsonify({"msg": "Game not found"}), 404
 
-                case = list(request.json.keys())
-                data = request.json.get(case[1])
-                match case[1]:
+                data = request.json.get("dataToFetch")
+                match request.json.get("casee"):
                     case "name":
                         db.session.execute(update(Games).where(
-                            Games.name == game.name).values(name=data))
+                            Games.id == game_id).values(name=data))
                         db.session.commit()
                     case "description":
                         db.session.execute(update(Games).where(
-                            Games.description == game.description).values(description=data))
+                            Games.id == game_id).values(description=data))
                         db.session.commit()
                     case "genres":
                         db.session.execute(update(Games).where(
-                            Games.genres == game.genres).values(genres=data))
+                            Games.id == game_id).values(genres=data))
                         db.session.commit()
                     case "developer":
                         db.session.execute(update(Games).where(
-                            Games.developer == game.developer).values(developer=data))
+                            Games.id == game_id).values(developer=data))
                         db.session.commit()
                     case "publisher":
                         db.session.execute(update(Games).where(
-                            Games.publisher == game.publisher).values(publisher=data))
+                            Games.id == game_id).values(publisher=data))
                         db.session.commit()
                     case "release":
+                        print("a")
                         db.session.execute(update(Games).where(
-                            Games.release_date == game.release_date).values(release_date=data))
+                            Games.id == game_id).values(release_date=data))
                         db.session.commit()
                     case "cover_link":
                         db.session.execute(update(Games).where(
-                            Games.cover_link == game.cover_link).values(cover_link=data))
+                            Games.id == game_id).values(cover_link=data))
                         db.session.commit()
 
                 response_body = {
@@ -223,6 +224,8 @@ def games_handle():
 
                 if not game:
                     return jsonify({"msg": "Game not found"}), 404
+                db.session.execute(
+                    delete(Reviews).where(Reviews.game_id == game.id))
                 db.session.execute(
                     delete(BacklogList).where(BacklogList.game_id == game.id))
                 db.session.execute(
@@ -260,7 +263,7 @@ def backlog_handle():
         case "POST":
             game_id = request.json.get("game_id")
             existing_game = db.session.execute(select(BacklogList).where(
-                BacklogList.game_id == game_id and BacklogList.user_id == user.id)).first()
+                BacklogList.game_id == game_id).where(BacklogList.user_id == user.id)).first()
             if existing_game:
                 return jsonify({"msg": "Game already in backlog of user"}), 409
 
@@ -282,7 +285,7 @@ def backlog_handle():
                 case "status":
                     status = request.json.get("status")
                     db.session.execute(update(BacklogList).where(
-                        BacklogList.user_id == user.id and BacklogList.game_id == game_id).values(status=status))
+                        BacklogList.user_id == user.id).where(BacklogList.game_id == game_id)).values(status=status)
                     db.session.commit()
                     return jsonify({
                         "msg": "Game status succesfully edited from backlog of user."
@@ -290,14 +293,14 @@ def backlog_handle():
                 case "rating":
                     rating = request.json.get("rating")
                     db.session.execute(update(BacklogList).where(
-                        BacklogList.user_id == user.id and BacklogList.game_id == game_id).values(rating=rating))
+                        BacklogList.user_id == user.id).where(BacklogList.game_id == game_id)).values(rating=rating)
                     db.session.commit()
                     return jsonify({
                         "msg": "Game rating succesfully edited from backlog of user."
                     }), 200
         case "DELETE":
             db.session.execute(delete(BacklogList).where(
-                BacklogList.user_id == user.id and BacklogList.game_id == BacklogList.game_id))
+                BacklogList.user_id == user.id).where(BacklogList.game_id == BacklogList.game_id))
             db.session.commit()
             return jsonify({
                 "msg": "Game deleted suscessfully from backlog of user."
@@ -360,7 +363,7 @@ def reviews_handle():
         case "POST":
             review = request.json.get("review")
             existing_review = db.session.execute(select(Reviews).where(
-                Reviews.user_id == user.id and Reviews.game_id == game_id)).scalars().first()
+                Reviews.user_id == user.id).where(Reviews.game_id == game_id)).scalars().first()
             if not existing_game or existing_review:
                 return jsonify({"msg": "Game does not exist or review already exists"}), 401
 
@@ -378,14 +381,14 @@ def reviews_handle():
         case "PUT":
             review = request.json.get("review")
             db.session.execute(update(Reviews).where(
-                Reviews.user_id == user.id and Reviews.game_id == game_id).values(review_text=review))
+                Reviews.user_id == user.id).where(Reviews.game_id == game_id)).values(review_text=review)
             db.session.commit()
             return jsonify({
                 "msg": "Game review succesfully edited."
             }), 200
         case "DELETE":
             db.session.execute(delete(Reviews).where(
-                Reviews.id == request.json.get("reviewToDelete")))
+                Reviews.id == request.json.get("id")))
             db.session.commit()
             return jsonify({
                 "msg": "Review deleted suscessfully from game."
@@ -408,7 +411,7 @@ def user_review_check(user_email, game_id):
     user_id = db.session.execute(select(User.id).where(
         User.email == user_email)).scalars().first()
     existing_review = db.session.execute(select(Reviews).where(
-        Reviews.user_id == user_id and Reviews.game_id == game_id)).scalar_one_or_none()
+        Reviews.user_id == user_id).where(Reviews.game_id == game_id)).scalar_one_or_none()
     response_body = {
         "msg": False,
         "review": "",

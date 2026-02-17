@@ -6,8 +6,8 @@ import { useEffect, useState } from "react";
 // Define and export the Single component which displays individual item details.
 export const Games = () => {
     // Access the global state using the custom hook.
+    const { store } = useGlobalReducer();
     const [data, setData] = useState([]);
-    const [admin, setAdmin] = useState();
     const [changes, setChanges] = useState(false);
     const backendUrl = import.meta.env.VITE_BACKEND_URL
     const handleFetch = async () => {
@@ -19,27 +19,6 @@ export const Games = () => {
             if (response.ok) {
                 setData(datajson.games);
             }
-        } catch (err) { }
-    }
-
-    const handleAdmin = async () => {
-        try {
-            if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
-
-            const response = await fetch(backendUrl + "api/admin", {
-                headers: {
-                    "Authorization": "Bearer " + localStorage.getItem("token")
-                }
-            });
-
-            const datajson = await response.json();
-
-            if (response.ok) {
-                setAdmin(datajson.msg);
-                return
-            }
-            setAdmin(false);
-            return
         } catch (err) { }
     }
 
@@ -90,7 +69,6 @@ export const Games = () => {
 
     useEffect(() => {
         handleFetch();
-        handleAdmin()
     }, [])
 
     useEffect(() => {
@@ -104,44 +82,29 @@ export const Games = () => {
             <div className="container text-center">
                 <ul>
                     {data.map((item, index) => <li key={index}>
-                        Game: {item.name} description: {item.description}
-                        genres: {item.genres} publisher: {item.publisher}
-                        developer: {item.developer} cover_link: {item.cover_link}
+                        Game: {item.name} description: {item.description} genres: {item.genres} publisher: {item.publisher} developer: {item.developer} cover_link: {item.cover_link}
                         <Link to={`/games/${item.name}/${item.id}`}><button >Details</button></Link>
                     </li>)}
                 </ul>
-                <Link to="/">
-                    <span className="btn btn-primary btn-lg" href="#" role="button">
-                        Back home
-                    </span>
-                </Link>
             </div>
         );
     }
 
-    if (admin) {
+    if (store.admin) {
         return (
             <div className="container text-center">
                 <ul>
                     {data.map((item, index) => <li key={index}>
-                        Game: {item.name} description: {item.description}
-                        genres: {item.genres} publisher: {item.publisher}
-                        developer: {item.developer} cover_link: {item.cover_link}
-                        release date: {item.release_date}
+                        Game: {item.name} description: {item.description} genres: {item.genres} publisher: {item.publisher} developer: {item.developer} cover_link: {item.cover_link} release date: {item.release_date}
                         <button onClick={() => handleAddGames(item.id)} >Add to backlog</button>
                         <Link to={`/games/${item.name}/${item.id}`}><button >Details</button></Link>
-                        <Link to={`/games/edit/${item.name}`}><button >Edit</button></Link>
+                        <Link to={`/games/edit/${item.name}/${item.id}`}><button >Edit</button></Link>
                         <button onClick={() => handleDelete(item.id)} >Delete</button>
                     </li>)}
                 </ul>
                 <Link to="/games/add">
                     <span className="btn btn-primary btn-lg" href="#" role="button">
                         Add Game
-                    </span>
-                </Link>
-                <Link to="/">
-                    <span className="btn btn-primary btn-lg" href="#" role="button">
-                        Back home
                     </span>
                 </Link>
             </div>
@@ -160,11 +123,6 @@ export const Games = () => {
                     <Link to={`/games/${item.name}/${item.id}`}><button >Details</button></Link>
                 </li>)}
             </ul>
-            <Link to="/">
-                <span className="btn btn-primary btn-lg" href="#" role="button">
-                    Back home
-                </span>
-            </Link>
         </div>
     );
 

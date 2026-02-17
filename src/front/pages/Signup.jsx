@@ -55,11 +55,6 @@ export const Signup = () => {
                 </div>
                 <button type="submit" className="btn btn-secondary">Create account</button>
             </form>
-            <Link to="/">
-                <span className="btn btn-primary btn-lg" href="#" role="button">
-                    Back home
-                </span>
-            </Link>
         </div>
     );
 };

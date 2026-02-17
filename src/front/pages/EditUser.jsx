@@ -72,11 +72,6 @@ export const Edit = () => {
                 </div>
                 <button type="submit" className="btn btn-secondary">Edit</button>
             </form>
-            <Link to="/">
-                <span className="btn btn-primary btn-lg" href="#" role="button">
-                    Back home
-                </span>
-            </Link>
         </div>
     )
 }

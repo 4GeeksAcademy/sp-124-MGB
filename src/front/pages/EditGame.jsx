@@ -1,10 +1,12 @@
 import { Link, useParams, useNavigate } from "react-router-dom";  // To use link for navigation and useParams to get URL parameters
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 
 export const EditGame = () => {
+    const params = useParams();
     const navigate = useNavigate();
-    const gameToEdit = useParams();
+    const game_id = params.game_id;
+    const game_name = params.game_name;
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
@@ -14,31 +16,36 @@ export const EditGame = () => {
     const [release, setRelease] = useState("");
     const [cover_link, setCover_link] = useState("");
 
+    const handleFetch = async () => {
+        try {
+            if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
+            const response = await fetch(backendUrl + "api/games/" + game_name + "/" + game_id);
+            const datajson = await response.json();
+            if (response.ok) {
+                setName(datajson.game.name);
+                setDescription(datajson.game.description);
+                setGenres(datajson.game.genres);
+                setPublisher(datajson.game.publisher);
+                setDeveloper(datajson.game.developer);
+                setRelease(datajson.game.release_date);
+                setCover_link(datajson.game.cover_link);
+            }
+
+        } catch (err) { console.log(err) }
+    }
+
     const handleEdit = async (e) => {
         e.preventDefault();
-        if (name != "") {
-            fetchData(gameToEdit, name);
-        }
-        if (description != "") {
-            fetchData(gameToEdit, description);
-        }
-        if (genres != "") {
-            fetchData(gameToEdit, genres);
-        }
-        if (developer != "") {
-            fetchData(gameToEdit, developer);
-        }
-        if (publisher != "") {
-            fetchData(gameToEdit, publisher);
-        }
-        if (release != "") {
-            fetchData(gameToEdit, release);
-        }
-        if (cover_link != "") {
-            fetchData(gameToEdit, cover_link);
-        }
+        handleData(name, "name");
+        handleData(description, "description");
+        handleData(genres, "genres");
+        handleData(developer, "developer");
+        handleData(publisher, "publisher");
+        handleData(release, "release");
+        handleData(cover_link, "cover_link");
     }
-    const fetchData = async (name, dataToFetch) => {
+
+    const handleData = async (dataToFetch, casee) => {
         try {
             const res = await fetch(backendUrl + "api/games", {
                 method: "PUT",
@@ -46,7 +53,7 @@ export const EditGame = () => {
                     "Content-Type": "application/json",
                     "Authorization": "Bearer " + localStorage.getItem("token")
                 },
-                body: JSON.stringify({ name, dataToFetch })
+                body: JSON.stringify({ game_id, dataToFetch, casee })
             });
 
             const data = await res.json();
@@ -61,6 +68,10 @@ export const EditGame = () => {
 
         }
     }
+
+    useEffect(() => {
+        handleFetch();
+    }, [])
 
     return (
         <div className="container mt-5">
@@ -77,11 +88,13 @@ export const EditGame = () => {
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                     />
-                    <input className="form-control"
-                        placeholder="Genres"
-                        value={genres}
-                        onChange={(e) => setGenres(e.target.value)}
-                    />
+                    <select value={genres} onChange={(e) => setGenres(e.target.value)} className="form-select" aria-label="Default select example">
+                        <option value="Action">Action</option>
+                        <option value="Adventure">RPG</option>
+                        <option value="Life Sim">Life Sim</option>
+                        <option value="RPG">Adventure</option>
+                        <option value="Platformer">Platformer</option>
+                    </select>
                     <input className="form-control"
                         placeholder="Publisher"
                         value={publisher}
@@ -99,17 +112,12 @@ export const EditGame = () => {
                     />
                     <input className="form-control"
                         placeholder="Cover Link"
-                        value={cover_link}
+                        value={cover_link ? cover_link : ""}
                         onChange={(e) => setCover_link(e.target.value)}
                     />
                 </div>
                 <button type="submit" className="btn btn-secondary">Edit</button>
             </form>
-            <Link to="/">
-                <span className="btn btn-primary btn-lg" href="#" role="button">
-                    Back home
-                </span>
-            </Link>
         </div>
     )
 }

@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import useGlobalReducer from "../hooks/useGlobalReducer";
 
 export const Login = () => {
+    const { store, dispatch } = useGlobalReducer();
     const navigate = useNavigate();
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const [username, setUsername] = useState("");
@@ -28,12 +30,33 @@ export const Login = () => {
             localStorage.setItem("token", data.token);
             localStorage.setItem("email", data.email);
             localStorage.setItem("username", username);
-
-            navigate("/")
+            handleAdmin()
+            navigate(-1)
         } catch (err) {
 
         }
     };
+
+    const handleAdmin = async () => {
+        try {
+            if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
+
+            const response = await fetch(backendUrl + "api/admin", {
+                headers: {
+                    "Authorization": "Bearer " + localStorage.getItem("token")
+                }
+            });
+
+            const datajson = await response.json();
+
+            if (response.ok) {
+                dispatch({ type: "set-admin", payload: datajson.msg })
+                return
+            }
+            store.setAdmin(false);
+            return
+        } catch (err) { }
+    }
 
     return (
         <div className="container mt-5">
@@ -55,11 +78,6 @@ export const Login = () => {
                 </div>
                 <button type="submit" className="btn btn-secondary">Login</button>
             </form>
-            <Link to="/">
-                <span className="btn btn-primary btn-lg" href="#" role="button">
-                    Back home
-                </span>
-            </Link>
         </div>
     );
 };
