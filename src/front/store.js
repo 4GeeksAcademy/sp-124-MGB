@@ -1,22 +1,15 @@
 export const initialStore = () => {
   return {
-    token: null,
-    email: "",
+    admin: false,
   };
 };
 
 export default function storeReducer(store, action = {}) {
   switch (action.type) {
-    case "login":
+    case "set-admin":
       return {
         ...store,
-        email: action.payload.email,
-      };
-
-    case "logout":
-      return {
-        ...store,
-        email: null,
+        admin: action.payload,
       };
   }
 }

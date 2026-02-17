@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import useGlobalReducer from "../hooks/useGlobalReducer"
 
 export const AddGames = () => {
     const navigate = useNavigate();
@@ -55,11 +54,13 @@ export const AddGames = () => {
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                     />
-                    <input className="form-control"
-                        placeholder="Genres"
-                        value={genres}
-                        onChange={(e) => setGenres(e.target.value)}
-                    />
+                    <select value={genres} onChange={(e) => setGenres(e.target.value)} className="form-select" aria-label="Default select example">
+                        <option value="Action">Action</option>
+                        <option value="Adventure">RPG</option>
+                        <option value="Life Sim">Life Sim</option>
+                        <option value="RPG">Adventure</option>
+                        <option value="Platformer">Platformer</option>
+                    </select>
                     <input className="form-control"
                         placeholder="Publisher"
                         value={publisher}
@@ -83,11 +84,6 @@ export const AddGames = () => {
                 </div>
                 <button type="submit" className="btn btn-secondary">Add Game</button>
             </form>
-            <Link to="/">
-                <span className="btn btn-primary btn-lg" href="#" role="button">
-                    Back home
-                </span>
-            </Link>
         </div>
     );
 };

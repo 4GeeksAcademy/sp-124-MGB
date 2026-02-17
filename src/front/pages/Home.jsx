@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-
+import useGlobalReducer from "../hooks/useGlobalReducer";
 export const Home = () => {
 
 	return (
@@ -8,12 +8,6 @@ export const Home = () => {
 			<div>To be carousel with news</div>
 			<div>To be small list of trending/editors pick games</div>
 			<div>
-				<Link to="/users">
-					<button type="button" className="btn btn-secondary p-2 m-2">Users</button>
-				</Link>
-				<Link to="/games">
-					<button type="button" className="btn btn-secondary p-2 m-2">Games</button>
-				</Link>
 			</div>
 		</div>
 	);

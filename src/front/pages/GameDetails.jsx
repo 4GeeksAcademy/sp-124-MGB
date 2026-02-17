@@ -1,10 +1,11 @@
 // Import necessary hooks and components from react-router-dom and other libraries.
-import { Link, useParams } from "react-router-dom";  // To use link for navigation and useParams to get URL parameters
+import { useParams } from "react-router-dom";  // To use link for navigation and useParams to get URL parameters
 import { useEffect, useState } from "react";
-
+import useGlobalReducer from "../hooks/useGlobalReducer";
 // Define and export the Single component which displays individual item details.
 export const GameDetails = () => {
     // Access the global state using the custom hook.
+    const { store, dispatch } = useGlobalReducer();
     const params = useParams();
     const game_name = params.game_name;
     const game_id = params.game_id;
@@ -12,11 +13,9 @@ export const GameDetails = () => {
     const [changes, setChanges] = useState(false);
     const [gameInfo, setGameInfo] = useState({});
     const [reviews, setReviews] = useState([]);
-    const [admin, setAdmin] = useState(false);
     const [review, setReview] = useState("");
     const [posted, setPosted] = useState(false);
     const [userReviewID, setUserReviewID] = useState();
-    const [reviewToDelete, setReviewToDelete] = useState()
 
     const handleFetch = async () => {
         try {
@@ -28,28 +27,6 @@ export const GameDetails = () => {
             }
 
 
-        } catch (err) { }
-    }
-
-    const handleAdmin = async () => {
-        try {
-            if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
-
-            const response = await fetch(backendUrl + "api/admin", {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": "Bearer " + localStorage.getItem("token")
-                }
-            });
-
-            const datajson = await response.json();
-
-            if (response.ok) {
-                setAdmin(datajson.msg);
-                return
-            }
-            setAdmin(false);
-            return
         } catch (err) { }
     }
 
@@ -125,22 +102,23 @@ export const GameDetails = () => {
             case "POST":
                 try {
                     if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
+                    if (review != "") {
+                        const res = await fetch(backendUrl + "api/reviews", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Authorization": "Bearer " + localStorage.getItem("token")
+                            },
+                            body: JSON.stringify({ game_id, review })
+                        });
 
-                    const res = await fetch(backendUrl + "api/reviews", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": "Bearer " + localStorage.getItem("token")
-                        },
-                        body: JSON.stringify({ game_id, review })
-                    });
+                        const data = await res.json();
 
-                    const data = await res.json();
-
-                    if (!res.ok) {
-                        return data.msg;
+                        if (!res.ok) {
+                            return data.msg;
+                        }
+                        setChanges(true)
                     }
-                    setChanges(true)
                 } catch (err) {
                 }
                 break;
@@ -165,40 +143,39 @@ export const GameDetails = () => {
                     setChanges(true)
                 } catch (err) { }
                 break;
-            case "DELETE":
-                try {
-                    if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
-
-                    const res = await fetch(backendUrl + "api/reviews", {
-                        method: "DELETE",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": "Bearer " + localStorage.getItem("token")
-                        },
-                        body: JSON.stringify({ reviewToDelete })
-                    });
-
-                    const data = await res.json();
-
-                    if (!res.ok) {
-                        return data.msg;
-                    }
-                    setChanges(true)
-                } catch (err) { }
-                break;
         }
+    }
 
+    const deleteButton = async (id) => {
+        try {
+            if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
+
+            const res = await fetch(backendUrl + "api/reviews", {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + localStorage.getItem("token")
+                },
+                body: JSON.stringify({ id })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                return data.msg;
+            }
+            setChanges(true)
+        } catch (err) { console.log(err) }
     }
 
     const removeButton = (id) => {
         if (id == userReviewID) {
-            return <button onClick={() => { setReviewToDelete(id); handleReviews("DELETE") }}>Delete</button>
+            return <button onClick={() => { deleteButton(id) }}>Delete</button>
         }
     }
 
     useEffect(() => {
         handleFetch();
-        handleAdmin();
         handleHasUserPostedReview();
         handleRating();
         handleReviews("GET");
@@ -241,7 +218,7 @@ export const GameDetails = () => {
             </div>
         );
     }
-    if (admin) {
+    if (store.admin) {
         return (
             <div className="container text-center">
                 <div>
@@ -262,7 +239,7 @@ export const GameDetails = () => {
                     <ul>
                         {reviews.map((item) => <li key={item.id}>
                             <p>{item.review_text}</p>
-                            <button onClick={() => { setReviewToDelete(item.id); handleReviews("DELETE") }} >Delete</button>
+                            <button onClick={() => { deleteButton(item.id) }} >Delete</button>
                         </li>)}
                     </ul>
                 </div>

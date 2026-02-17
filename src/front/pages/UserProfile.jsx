@@ -9,8 +9,11 @@ export const UserProfile = () => {
     const username = useParams()
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const [backlog, setBacklog] = useState([]);
+    const [statusGame, setStatus] = useState();
+    const [rating, setRating] = useState();
     const [gamesinfo, setGamesinfo] = useState([]);
     const [changes, setChanges] = useState(false)
+
     const handleFetch = async () => {
         try {
             if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
@@ -25,16 +28,29 @@ export const UserProfile = () => {
 
         } catch (err) { }
     }
+
+    const handleEdit = async () => {
+        return (
+            <p>a</p>)
+    }
+
     const renderCards = () => {
         const cards = [];
         for (let i = 0; i < gamesinfo.length; i++) {
-            cards.push(<li key={i}>Game: {gamesinfo[i].name}
-                Rating: {backlog[i].rating} Status: {backlog[i].status}
+            cards.push(<li key={i}>Game: {gamesinfo[i].name} Rating:
+                {backlog[i].rating} Status: {backlog[i].status}
+                <div className="dropdown">
+                    <button className="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Dropdown button
+                    </button>
+                    <ul className="dropdown-menu">
+                        <li className="dropdown-item">{handleEdit}</li>
+                    </ul>
+                </div>
             </li>)
         }
         return cards
     }
-
 
     useEffect(() => {
         handleFetch();
@@ -51,11 +67,6 @@ export const UserProfile = () => {
             <ul>
                 {renderCards()}
             </ul>
-            <Link to="/">
-                <span className="btn btn-primary btn-lg" href="#" role="button">
-                    Back home
-                </span>
-            </Link>
         </div>
     );
 };
