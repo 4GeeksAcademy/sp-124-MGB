@@ -4,7 +4,7 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from sqlalchemy import delete, desc, select, update
 from flask import request, jsonify, Blueprint
-from api.models import Reviews, db, User, BacklogList, Games
+from api.models import Reviews, Suggestions, db, User, BacklogList, Games
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt, check_password_hash
 
@@ -426,3 +426,43 @@ def user_review_check(user_email, game_id):
         }
 
     return jsonify(response_body), 200
+
+
+@api.route('/suggestions', methods=['GET', 'POST', 'DELETE'])
+@jwt_required()
+def suggestions():
+    current_user_identity = get_jwt_identity()
+    user = db.session.execute(select(User).where(
+        User.email == current_user_identity)).scalar_one_or_none()
+
+    if not user:
+        return jsonify({"msg": "User not found"}), 404
+
+    match request.method:
+        case "GET":
+            if not user.is_admin:
+                return jsonify({"msg": "Nice try"}), 409
+
+            suggestions = db.session.execute(select(Suggestions)).scalars.all()
+            return jsonify({"suggestions": list(map(lambda suggestions: suggestions.serialize(), suggestions))})
+
+        case "POST":
+            new_suggestion = Suggestions(
+                suggestion=request.json.get("suggestion"),
+                user_id=request.json.get("user_id"),
+            )
+            db.session.add(new_suggestion)
+            db.session.commit()
+
+            return jsonify({
+                "msg": "Suggestion added succesfully."
+            }), 200
+        case "DELETE":
+            if not user.is_admin:
+                return jsonify({"msg": "Nice try"}), 409
+            db.session.execute(delete(Suggestions).where(
+                Suggestions.id == request.json.get("suggestion_id")))
+            db.session.commit()
+            return jsonify({
+                "msg": "Suggestions deleted suscessfully."
+            }), 200

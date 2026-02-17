@@ -50,8 +50,12 @@ export const Navbar = () => {
 					<Link to="/users">
 						<button type="button" className="btn btn-secondary p-2 m-2">Users</button>
 					</Link>
+
 					<Link to="/games">
 						<button type="button" className="btn btn-secondary p-2 m-2">Games list</button>
+					</Link>
+					<Link to="/suggestions">
+						<button type="button" className="btn btn-secondary p-2 m-2">Suggestions</button>
 					</Link>
 					<div className="ml-auto">
 						<Link to={`/profiles/${localStorage.getItem("username")}`}>
@@ -74,6 +78,9 @@ export const Navbar = () => {
 				</Link>
 				<Link to="/games">
 					<button type="button" className="btn btn-secondary p-2 m-2">Games list</button>
+				</Link>
+				<Link to="/suggestions">
+					<button type="button" className="btn btn-secondary p-2 m-2">Suggestions</button>
 				</Link>
 				<div className="ml-auto">
 					<Link to={`/profiles/${localStorage.getItem("username")}`}>
