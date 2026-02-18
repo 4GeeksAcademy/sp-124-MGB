@@ -9,7 +9,6 @@ export const Navbar = () => {
 		localStorage.removeItem("token");
 		localStorage.removeItem("email");
 		localStorage.removeItem("admin");
-		dispatch({ type: "set-admin", payload: false })
 		navigate("/")
 	}
 
@@ -38,7 +37,7 @@ export const Navbar = () => {
 		);
 	}
 
-	if (store.admin) {
+	if (localStorage.getItem("admin") == "true") {
 		return (
 			<nav className="navbar navbar-light bg-light">
 				<div className="container">

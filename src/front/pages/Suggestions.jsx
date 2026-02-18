@@ -7,7 +7,7 @@ export const Suggestions = () => {
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const [changes, setChanges] = useState(false);
     const [suggestions, setSuggestions] = useState([]);
-
+    const [suggestion, setSuggestion] = useState("")
 
     const handleFetch = async () => {
         try {
@@ -28,7 +28,9 @@ export const Suggestions = () => {
         } catch (err) { }
     }
 
-    const handlePost = async () => {
+    const handlePost = async (e) => {
+        console.log(suggestion)
+        e.preventDefault();
         try {
             if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
             const response = await fetch(backendUrl + "api/suggestions", {
@@ -37,7 +39,7 @@ export const Suggestions = () => {
                     "Content-Type": "application/json",
                     "Authorization": "Bearer " + localStorage.getItem("token")
                 },
-                body: JSON.stringify({ suggestions })
+                body: JSON.stringify({ suggestion })
             }
             );
             const datajson = await response.json();
@@ -71,16 +73,6 @@ export const Suggestions = () => {
         } catch (err) { console.log(err) }
     }
 
-    useEffect(() => {
-        handleFetch();
-    }, [])
-
-    useEffect(() => {
-        handleFetch();
-        setChanges(false);
-    }, [changes])
-
-
     if (!localStorage.getItem("token")) {
         return (
             <div className="container text-center">
@@ -88,14 +80,22 @@ export const Suggestions = () => {
             </div>
         );
     }
-    if (store.admin) {
+    if (localStorage.getItem("admin")) {
+        useEffect(() => {
+            handleFetch();
+        }, [])
+
+        useEffect(() => {
+            handleFetch();
+            setChanges(false);
+        }, [changes])
         return (
             <div className="container text-center">
                 <div>
                     <p>Suggestions</p>
                     <ul>
                         {suggestions.map((item) => <li key={item.id}>
-                            <p>{item.suggestion}</p>
+                            <p>User id: {item.user_id} Suggestion: {item.suggestion}</p>
                             <button onClick={() => { deleteButton(item.id) }} >Delete</button>
                         </li>)}
                     </ul>
@@ -108,12 +108,12 @@ export const Suggestions = () => {
         <div className="container text-center">
             <h1>Suggestions</h1>
             <div>
-                <form onSubmit={(e) => e.preventDefault()}>
+                <form onSubmit={handlePost}>
                     <div className="mb-3">
                         <hr />
-                        <textarea className="form-control" id="suggestion" rows="3" type="text" value={suggestions} onChange={(e) => setSuggestions(e.target.value)}></textarea>
+                        <textarea className="form-control" id="suggestion" rows="3" type="text" value={suggestion} onChange={(e) => setSuggestion(e.target.value)}></textarea>
                     </div>
-                    <button type="submit" onClick={() => handlePost()} className="btn btn-secondary">Send suggestion</button>
+                    <button type="submit" className="btn btn-secondary">Send suggestion</button>
                 </form>
             </div>
         </div>

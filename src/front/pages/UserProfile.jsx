@@ -34,7 +34,17 @@ export const UserProfile = () => {
             <p>a</p>)
     }
 
-    const renderCards = () => {
+    const renderCardsNotUser = () => {
+        const cards = [];
+        for (let i = 0; i < gamesinfo.length; i++) {
+            cards.push(<li key={i}>Game: {gamesinfo[i].name} Rating:
+                {backlog[i].rating} Status: {backlog[i].status}
+            </li>)
+        }
+        return cards
+    }
+
+    const renderCardsUser = () => {
         const cards = [];
         for (let i = 0; i < gamesinfo.length; i++) {
             cards.push(<li key={i}>Game: {gamesinfo[i].name} Rating:
@@ -61,11 +71,38 @@ export const UserProfile = () => {
         setChanges(false)
     }, [changes])
 
+    if (localStorage.getItem("admin")) {
+        return (
+            <div className="container text-center">
+                <h1>{username.username}</h1>
+                <ul>
+                    {renderCardsNotUser()}
+                </ul>
+            </div>
+        );
+    }
+
+    if (localStorage.getItem("username") == username.username) {
+        return (
+            <div className="container text-center">
+                <h1>{username.username}</h1>
+                <Link to={`/edit/${username.username}`}>
+                    <span className="btn btn-primary btn-lg" href="#" role="button">
+                        Edit Account
+                    </span>
+                </Link>
+                <ul>
+                    {renderCardsUser()}
+                </ul>
+            </div>
+        );
+    }
+
     return (
         <div className="container text-center">
             <h1>{username.username}</h1>
             <ul>
-                {renderCards()}
+                {renderCardsNotUser()}
             </ul>
         </div>
     );

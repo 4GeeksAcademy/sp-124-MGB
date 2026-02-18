@@ -90,7 +90,7 @@ export const Games = () => {
         );
     }
 
-    if (store.admin) {
+    if (localStorage.getItem("admin")) {
         return (
             <div className="container text-center">
                 <ul>

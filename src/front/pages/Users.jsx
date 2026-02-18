@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 // Define and export the Single component which displays individual item details.
 export const Users = () => {
     // Access the global state using the custom hook.
-    const [data, setData] = useState(null);
+    const [data, setData] = useState([]);
     const [changes, setChanges] = useState(false)
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const handleFetch = async () => {
@@ -46,6 +46,7 @@ export const Users = () => {
         }
     }
 
+    if (!localStorage.getItem("admin")) return <p>YOU SHOULD NOT BE HERE, AWAYYYYY</p>;
     useEffect(() => {
         handleFetch();
     }, [])
@@ -55,13 +56,11 @@ export const Users = () => {
         setChanges(false)
     }, [changes])
 
-    if (!data) return <p>YOU SHOULD NOT BE HERE, AWAYYYYY</p>;
-
     return (
         <div className="container text-center">
             <ul>
                 {data.map((item, index) => <li key={index}>
-                    Username: {item.username} Email: {item.email}
+                    User id: {item.id} Username: {item.username} Email: {item.email}
                     <Link to={`/edit/${item.username}`}><button >Edit</button></Link>
                     <Link to={`/profiles/${item.username}`}><button >Profile</button></Link>
                     <button onClick={() => handleDelete(item.username)} >Delete</button>

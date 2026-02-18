@@ -50,10 +50,9 @@ export const Login = () => {
             const datajson = await response.json();
 
             if (response.ok) {
-                dispatch({ type: "set-admin", payload: datajson.msg })
+                localStorage.setItem("admin", true)
                 return
             }
-            store.setAdmin(false);
             return
         } catch (err) { }
     }

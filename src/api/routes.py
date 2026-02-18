@@ -443,13 +443,14 @@ def suggestions():
             if not user.is_admin:
                 return jsonify({"msg": "Nice try"}), 409
 
-            suggestions = db.session.execute(select(Suggestions)).scalars.all()
+            suggestions = db.session.execute(
+                select(Suggestions)).scalars().all()
             return jsonify({"suggestions": list(map(lambda suggestions: suggestions.serialize(), suggestions))})
 
         case "POST":
             new_suggestion = Suggestions(
                 suggestion=request.json.get("suggestion"),
-                user_id=request.json.get("user_id"),
+                user_id=user.id,
             )
             db.session.add(new_suggestion)
             db.session.commit()

@@ -218,7 +218,7 @@ export const GameDetails = () => {
             </div>
         );
     }
-    if (store.admin) {
+    if (localStorage.getItem("admin") == "true") {
         return (
             <div className="container text-center">
                 <div>

@@ -4,6 +4,9 @@ import { useNavigate, Link } from "react-router-dom";
 export const AddGames = () => {
     const navigate = useNavigate();
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
+    const apiUrl = import.meta.env.VITE_RAWG_URL;
+    const apiKey = import.meta.env.VITE_RAWG_API_KEY;
+    const [slug, setSlug] = useState("");
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [genres, setGenres] = useState("");
@@ -11,6 +14,33 @@ export const AddGames = () => {
     const [developer, setDeveloper] = useState("");
     const [release, setRelease] = useState("");
     const [cover_link, setCover_link] = useState("");
+
+    const handleFetch = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await fetch(apiUrl + slug + "?key=" + apiKey, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            });
+
+            const data = await res.json();
+            console.log(data);
+            if (res.ok) {
+                setName(data.name);
+                setDescription(data.description_raw);
+                setRelease(data.released);
+                setDeveloper(data.developers[0].name);
+                setPublisher(data.publishers[0].name ? data.publishers[0].name : data.developers[0].name);
+                setCover_link(data.background_image);
+                return
+            }
+
+        } catch (err) {
+
+        }
+    }
 
     const handlePostGame = async (e) => {
         e.preventDefault();
@@ -41,7 +71,16 @@ export const AddGames = () => {
 
     return (
         <div className="container mt-5">
-            <h2 className="display-6">Create account</h2>
+            <h2 className="display-6">Add games</h2>
+            <h3>Search game</h3>
+            <form onSubmit={handleFetch}>
+                <input className="form-control"
+                    placeholder="slug"
+                    value={slug}
+                    onChange={(e) => setSlug((e.target.value).replace(" ", "-"))}
+                />
+                <button type="submit" className="btn btn-secondary">Search Game</button>
+            </form>
             <form onSubmit={handlePostGame}>
                 <div className="mb-3 d-flex m-2 gap-2">
                     <input className="form-control"
@@ -60,6 +99,8 @@ export const AddGames = () => {
                         <option value="Life Sim">Life Sim</option>
                         <option value="RPG">Adventure</option>
                         <option value="Platformer">Platformer</option>
+                        <option value="Puzzles">Puzzles</option>
+                        <option value="Shooter">Shooter</option>
                     </select>
                     <input className="form-control"
                         placeholder="Publisher"
