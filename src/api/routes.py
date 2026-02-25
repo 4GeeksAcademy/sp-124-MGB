@@ -17,19 +17,6 @@ CORS(api)
 bcrypt = Bcrypt()
 
 
-@api.route('/admin', methods=['GET'])
-@jwt_required()
-def admin_check():
-    current_user_identity = get_jwt_identity()
-    if (db.session.execute(select(User.is_admin).where(User.email == current_user_identity)).scalar()):
-        response_body = {
-            "msg": True
-        }
-        return jsonify(response_body), 200
-
-    return jsonify({"msg": False}), 401
-
-
 @api.route('/users', methods=['GET'])
 @jwt_required()
 def users():
@@ -79,11 +66,13 @@ def login():
     username = request.json.get("username", None)
     password = request.json.get("password", None)
 
-    user = User.query.filter_by(username=username).first()
+    user = db.session.execute(select(User).where(
+        User.username == username)).scalar_one_or_none()
 
     if user and check_password_hash(user.password.encode('utf-8'), password.encode('utf-8')):
-        access_token = create_access_token(identity=user.email)
-        return jsonify({"token": access_token, "email": user.email})
+        access_token = create_access_token(
+            identity=user.email, additional_claims={"role": user.is_admin, "email": user.email})
+        return jsonify({"token": access_token, "role": user.is_admin, "email": user.email})
 
     return jsonify({"msg": "Invalid credentials"}), 401
 
@@ -279,25 +268,16 @@ def backlog_handle():
                 "msg": "Game added succesfully to the user's backlog."
             }), 200
         case "PUT":
-            game_id = request.json.get("game_id")
-            change = request.json.get(change)
-            match change:
-                case "status":
-                    status = request.json.get("status")
-                    db.session.execute(update(BacklogList).where(
-                        BacklogList.user_id == user.id).where(BacklogList.game_id == game_id)).values(status=status)
-                    db.session.commit()
-                    return jsonify({
-                        "msg": "Game status succesfully edited from backlog of user."
-                    }), 200
-                case "rating":
-                    rating = request.json.get("rating")
-                    db.session.execute(update(BacklogList).where(
-                        BacklogList.user_id == user.id).where(BacklogList.game_id == game_id)).values(rating=rating)
-                    db.session.commit()
-                    return jsonify({
-                        "msg": "Game rating succesfully edited from backlog of user."
-                    }), 200
+            backlog_id = request.json.get("edit")
+            statusGame = request.json.get("statusGame")
+            rating = request.json.get("rating")
+            print(statusGame)
+            db.session.execute(update(BacklogList).where(
+                BacklogList.id == backlog_id).values(status=statusGame, rating=rating))
+            db.session.commit()
+            return jsonify({
+                "msg": "Game status succesfully edited from backlog of user."
+            }), 200
         case "DELETE":
             db.session.execute(delete(BacklogList).where(
                 BacklogList.user_id == user.id).where(BacklogList.game_id == BacklogList.game_id))
@@ -309,7 +289,6 @@ def backlog_handle():
 
 @api.route('/backlog/<username>', methods=['GET'])
 def backlog(username):
-    print(username)
     user_id = db.session.execute(
         select(User.id).where(User.username == username)).scalar()
     backlog = db.session.execute(select(BacklogList).where(

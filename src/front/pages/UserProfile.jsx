@@ -1,6 +1,5 @@
 // Import necessary hooks and components from react-router-dom and other libraries.
 import { Link, useParams } from "react-router-dom";  // To use link for navigation and useParams to get URL parameters
-import useGlobalReducer from "../hooks/useGlobalReducer";  // Import a custom hook for accessing the global state
 import { useEffect, useState } from "react";
 
 // Define and export the Single component which displays individual item details.
@@ -9,10 +8,11 @@ export const UserProfile = () => {
     const username = useParams()
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const [backlog, setBacklog] = useState([]);
-    const [statusGame, setStatus] = useState();
-    const [rating, setRating] = useState();
+    const [statusGame, setStatus] = useState("");
+    const [rating, setRating] = useState(undefined);
     const [gamesinfo, setGamesinfo] = useState([]);
     const [changes, setChanges] = useState(false)
+    const [edit, setEdit] = useState()
 
     const handleFetch = async () => {
         try {
@@ -29,9 +29,27 @@ export const UserProfile = () => {
         } catch (err) { }
     }
 
-    const handleEdit = async () => {
-        return (
-            <p>a</p>)
+    const handleEdit = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await fetch(backendUrl + "api/backlog", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + localStorage.getItem("token")
+                },
+                body: JSON.stringify({ edit, rating, statusGame })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                return data.msg;
+            }
+            setChanges(true);
+        } catch (err) {
+
+        }
     }
 
     const renderCardsNotUser = () => {
@@ -43,23 +61,73 @@ export const UserProfile = () => {
         }
         return cards
     }
+    const editHandle = (id, index) => {
+        setEdit(id);
+        setStatus(backlog[index].status);
+        if (backlog[index].rating == undefined) {
+            setRating(undefined);
+        } else {
+            setRating(backlog[index].rating);
+        }
+
+    }
+
 
     const renderCardsUser = () => {
         const cards = [];
         for (let i = 0; i < gamesinfo.length; i++) {
             cards.push(<li key={i}>Game: {gamesinfo[i].name} Rating:
                 {backlog[i].rating} Status: {backlog[i].status}
-                <div className="dropdown">
-                    <button className="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Dropdown button
-                    </button>
-                    <ul className="dropdown-menu">
-                        <li className="dropdown-item">{handleEdit}</li>
-                    </ul>
-                </div>
+                <button onClick={() => editHandle(backlog[i].id, i)} type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    Edit
+                </button>
             </li>)
         }
         return cards
+    }
+
+    const modal = () => {
+        return (
+            <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h1 className="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            <form id="myForm" onSubmit={handleEdit}>
+                                <div className="d-flex">
+                                    <div className="form-floating mb-3 d-flex m-2 gap-2">
+                                        <select onChange={(e) => setRating(e.target.value)} className="form-select" id="rating" aria-label="Default select example">
+                                            <option value={1}>1</option>
+                                            <option value={2}>2</option>
+                                            <option value={3}>3</option>
+                                            <option value={4}>4</option>
+                                            <option value={5}>5</option>
+                                        </select>
+                                        <label htmlFor="rating">Rating</label>
+                                    </div>
+                                    <div className="form-floating mb-3 d-flex m-2 gap-2">
+                                        <select onChange={(e) => setStatus(e.target.value)} className="form-select" id="status" aria-label="Default select example">
+                                            <option value="In backlog">In Backlog</option>
+                                            <option value="Playing">Playing</option>
+                                            <option value="Dropped">Dropped</option>
+                                            <option value="Finished">Finished</option>
+                                        </select>
+                                        <label htmlFor="status">Status</label>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" form="myForm" className="btn btn-primary" data-bs-dismiss="modal">Save changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
     }
 
     useEffect(() => {
@@ -76,8 +144,9 @@ export const UserProfile = () => {
             <div className="container text-center">
                 <h1>{username.username}</h1>
                 <ul>
-                    {renderCardsNotUser()}
+                    {renderCardsUser()}
                 </ul>
+                {modal()}
             </div>
         );
     }
@@ -94,7 +163,25 @@ export const UserProfile = () => {
                 <ul>
                     {renderCardsUser()}
                 </ul>
+                <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h1 className="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div className="modal-body">
+                                {edit}
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" className="btn btn-primary">Save changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+
         );
     }
 

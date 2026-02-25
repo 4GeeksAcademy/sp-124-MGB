@@ -1,9 +1,7 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import useGlobalReducer from "../hooks/useGlobalReducer";
+import { useNavigate } from "react-router-dom";
 
 export const Login = () => {
-    const { store, dispatch } = useGlobalReducer();
     const navigate = useNavigate();
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const [username, setUsername] = useState("");
@@ -30,32 +28,12 @@ export const Login = () => {
             localStorage.setItem("token", data.token);
             localStorage.setItem("email", data.email);
             localStorage.setItem("username", username);
-            handleAdmin()
-            navigate(-1)
+            localStorage.setItem("admin", data.role);
+            navigate(-1);
         } catch (err) {
 
         }
     };
-
-    const handleAdmin = async () => {
-        try {
-            if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
-
-            const response = await fetch(backendUrl + "api/admin", {
-                headers: {
-                    "Authorization": "Bearer " + localStorage.getItem("token")
-                }
-            });
-
-            const datajson = await response.json();
-
-            if (response.ok) {
-                localStorage.setItem("admin", true)
-                return
-            }
-            return
-        } catch (err) { }
-    }
 
     return (
         <div className="container mt-5">
