@@ -37,23 +37,25 @@ export const Login = () => {
 
     return (
         <div className="container mt-5">
-            <h2 className="display-6">Login</h2>
+            <h2 className="display-6 login-color">Login</h2>
             <form onSubmit={handleLogin}>
-                <div className="mb-3 d-flex m-2 gap-2">
-                    <input className="form-control"
+                <div className="mt-3 d-md-flex gap-2 justify-content-md-center">
+                    <input className="form-control mb-3"
                         type="username"
                         placeholder="Username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                     />
-                    <input className="form-control"
+                    <input className="form-control mb-3"
                         type="password"
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
+                </div >
+                <div className="d-md-inline d-sm-flex justify-content-sm-center">
+                    <button type="submit" className="btn button-css">Login</button>
                 </div>
-                <button type="submit" className="btn btn-secondary">Login</button>
             </form>
         </div>
     );

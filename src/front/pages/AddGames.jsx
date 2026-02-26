@@ -35,6 +35,7 @@ export const AddGames = () => {
                 setPublisher(data.publishers[0].name ? data.publishers[0].name : data.developers[0].name);
                 setCover_link(data.background_image);
                 return
+
             }
 
         } catch (err) {
@@ -68,63 +69,72 @@ export const AddGames = () => {
 
         }
     };
-
-    return (
-        <div className="container mt-5">
-            <h2 className="display-6">Add games</h2>
-            <h3>Search game</h3>
-            <form onSubmit={handleFetch}>
-                <input className="form-control"
-                    placeholder="slug"
-                    value={slug}
-                    onChange={(e) => setSlug((e.target.value).replace(" ", "-"))}
-                />
-                <button type="submit" className="btn btn-secondary">Search Game</button>
-            </form>
-            <form onSubmit={handlePostGame}>
-                <div className="mb-3 d-flex m-2 gap-2">
-                    <input className="form-control"
-                        placeholder="Name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
+    if (localStorage.getItem("admin") == "true") {
+        return (
+            <div className="container mt-5">
+                <h3 className="display-6 login-color text-center">Search game</h3>
+                <form className="mt-3 gap-2 mb-5" onSubmit={handleFetch}>
+                    <input className="form-control mb-3"
+                        placeholder="slug"
+                        value={slug}
+                        onChange={(e) => setSlug((e.target.value).replace(" ", "-"))}
                     />
-                    <input className="form-control"
+                    <div className="d-md-inline d-sm-flex justify-content-sm-center">
+                        <button type="submit" className="btn button-css">Search</button>
+                    </div>
+                </form>
+                <h3 className="display-6 login-color text-center">Add game</h3>
+                <form onSubmit={handlePostGame}>
+                    <div className="mt-3 d-md-flex gap-2 justify-content-md-center">
+                        <input className="form-control mb-3"
+                            placeholder="Name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
+                        <select value={genres} onChange={(e) => setGenres(e.target.value)} className="form-select mb-3" aria-label="Default select example">
+                            <option value="Action">Action</option>
+                            <option value="Adventure">Adventure</option>
+                            <option value="Life Sim">Life Sim</option>
+                            <option value="RPG">RPG</option>
+                            <option value="Platformer">Platformer</option>
+                            <option value="Puzzles">Puzzles</option>
+                            <option value="Shooter">Shooter</option>
+                        </select>
+                        <input className="form-control mb-3"
+                            placeholder="Publisher"
+                            value={publisher}
+                            onChange={(e) => setPublisher(e.target.value)}
+                        />
+                        <input className="form-control mb-3"
+                            placeholder="Developer"
+                            value={developer}
+                            onChange={(e) => setDeveloper(e.target.value)}
+                        />
+                        <input className="form-control mb-3"
+                            placeholder="Release"
+                            value={release}
+                            onChange={(e) => setRelease(e.target.value)}
+                        />
+                        <input className="form-control mb-3"
+                            placeholder="Cover Link"
+                            value={cover_link}
+                            onChange={(e) => setCover_link(e.target.value)}
+                        />
+                    </div>
+                    <textarea className="form-control mb-3"
                         placeholder="Description"
+                        type="text"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                     />
-                    <select value={genres} onChange={(e) => setGenres(e.target.value)} className="form-select" aria-label="Default select example">
-                        <option value="Action">Action</option>
-                        <option value="Adventure">RPG</option>
-                        <option value="Life Sim">Life Sim</option>
-                        <option value="RPG">Adventure</option>
-                        <option value="Platformer">Platformer</option>
-                        <option value="Puzzles">Puzzles</option>
-                        <option value="Shooter">Shooter</option>
-                    </select>
-                    <input className="form-control"
-                        placeholder="Publisher"
-                        value={publisher}
-                        onChange={(e) => setPublisher(e.target.value)}
-                    />
-                    <input className="form-control"
-                        placeholder="Developer"
-                        value={developer}
-                        onChange={(e) => setDeveloper(e.target.value)}
-                    />
-                    <input className="form-control"
-                        placeholder="Release"
-                        value={release}
-                        onChange={(e) => setRelease(e.target.value)}
-                    />
-                    <input className="form-control"
-                        placeholder="Cover Link"
-                        value={cover_link}
-                        onChange={(e) => setCover_link(e.target.value)}
-                    />
-                </div>
-                <button type="submit" className="btn btn-secondary">Add Game</button>
-            </form>
-        </div>
-    );
+                    <div className="d-md-inline d-sm-flex justify-content-sm-center">
+                        <button type="submit" className="btn button-css">Add Game</button>
+                    </div>
+                </form>
+            </div>
+        );
+    }
+    return (
+        <p>Nope</p>
+    )
 };

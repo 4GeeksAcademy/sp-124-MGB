@@ -1,5 +1,4 @@
-import { Link, useParams, useNavigate } from "react-router-dom";  // To use link for navigation and useParams to get URL parameters
-import useGlobalReducer from "../hooks/useGlobalReducer";  // Import a custom hook for accessing the global state
+import { useParams, useNavigate } from "react-router-dom";  // To use link for navigation and useParams to get URL parameters
 import { useState } from "react";
 
 export const Edit = () => {
@@ -39,39 +38,46 @@ export const Edit = () => {
                 return data.msg;
             }
 
-            navigate("/users")
+            navigate(-1)
 
         } catch (err) {
 
         }
     }
 
+    if (localStorage.getItem("admin") == "true" || usernameToEdit.username == localStorage.getItem("username")) {
+        return (
+            <div className="container mt-5">
+                <h2 className="display-6 login-color">Edit account details {usernameToEdit.username}</h2>
+                <form onSubmit={handleEdit}>
+                    <div className="mt-3 d-md-flex gap-2 justify-content-md-center">
+                        <input className="form-control mb-3"
+                            type="username"
+                            placeholder="Username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                        />
+                        <input className="form-control mb-3"
+                            type="email"
+                            placeholder="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                        <input className="form-control mb-3"
+                            type="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                    </div>
+                    <div className="d-md-inline d-sm-flex justify-content-sm-center">
+                        <button type="submit" className="btn button-css">Edit</button>
+                    </div>
+                </form>
+            </div>
+        )
+    }
     return (
-        <div className="container mt-5">
-            <h2 className="display-6">Edit account details</h2>
-            <form onSubmit={handleEdit}>
-                <div className="mb-3 d-flex m-2 gap-2">
-                    <input className="form-control"
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <input className="form-control"
-                        type="username"
-                        placeholder="Username"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                    />
-                    <input className="form-control"
-                        type="email"
-                        placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                </div>
-                <button type="submit" className="btn btn-secondary">Edit</button>
-            </form>
-        </div>
+        <p>Nope</p>
     )
 }

@@ -1,11 +1,10 @@
 // Import necessary hooks and components from react-router-dom and other libraries.
 import { useParams } from "react-router-dom";  // To use link for navigation and useParams to get URL parameters
 import { useEffect, useState } from "react";
-import useGlobalReducer from "../hooks/useGlobalReducer";
+import Swal from 'sweetalert2'
 // Define and export the Single component which displays individual item details.
 export const GameDetails = () => {
     // Access the global state using the custom hook.
-    const { store, dispatch } = useGlobalReducer();
     const params = useParams();
     const game_name = params.game_name;
     const game_id = params.game_id;
@@ -16,6 +15,8 @@ export const GameDetails = () => {
     const [review, setReview] = useState("");
     const [posted, setPosted] = useState(false);
     const [userReviewID, setUserReviewID] = useState();
+    const [rating, setRating] = useState();
+    const [users, setUsers] = useState([]);
 
     const handleFetch = async () => {
         try {
@@ -58,7 +59,8 @@ export const GameDetails = () => {
             const response = await fetch(backendUrl + "api/backlog/" + game_id);
             const datajson = await response.json();
             if (response.ok) {
-                return datajson.rating
+                setRating(datajson.rating)
+                return
             }
 
         } catch (err) { }
@@ -78,9 +80,20 @@ export const GameDetails = () => {
             const data = await res.json();
 
             if (!res.ok) {
+                Swal.fire({
+                    title: 'Added',
+                    text: 'This game is already in your backlog',
+                    icon: 'error',
+                    confirmButtonText: 'Close'
+                })
                 return data.msg;
             }
-
+            Swal.fire({
+                title: 'Added',
+                text: 'Added game to backlog',
+                icon: 'success',
+                confirmButtonText: 'Close'
+            })
         } catch (err) {
 
         }
@@ -96,6 +109,7 @@ export const GameDetails = () => {
                     const datajson = await response.json();
                     if (response.ok) {
                         setReviews(datajson.reviews)
+                        setUsers(datajson.users)
                     }
                 } catch (err) { }
                 break;
@@ -115,8 +129,20 @@ export const GameDetails = () => {
                         const data = await res.json();
 
                         if (!res.ok) {
+                            Swal.fire({
+                                title: 'Review',
+                                text: 'The review could not be posted',
+                                icon: 'error',
+                                confirmButtonText: 'Close'
+                            })
                             return data.msg;
                         }
+                        Swal.fire({
+                            title: 'Review',
+                            text: 'The review was posted successfully',
+                            icon: 'success',
+                            confirmButtonText: 'Close'
+                        })
                         setChanges(true)
                     }
                 } catch (err) {
@@ -138,8 +164,20 @@ export const GameDetails = () => {
                     const data = await res.json();
 
                     if (!res.ok) {
+                        Swal.fire({
+                            title: 'Review',
+                            text: 'The review could not be edited',
+                            icon: 'error',
+                            confirmButtonText: 'Close'
+                        })
                         return data.msg;
                     }
+                    Swal.fire({
+                        title: 'Review',
+                        text: 'The review was edited successfully',
+                        icon: 'success',
+                        confirmButtonText: 'Close'
+                    })
                     setChanges(true)
                 } catch (err) { }
                 break;
@@ -195,23 +233,37 @@ export const GameDetails = () => {
 
     if (!localStorage.getItem("token")) {
         return (
-            <div className="container text-center">
-                <div>
-                    <div>coverHere</div>
+            <div className="container game-card rounded mt-4">
+                <div className="row text-center">
+                    <div className="col-12 d-flex justify-content-center align-self-center ">
+                        <div className="img-container-lg">
+                            <img className="game-list-img mt-2 mb-2" src={gameInfo.cover_link ? gameInfo.cover_link : ""}></img>
+                        </div>
+                    </div>
                     <h1>{gameInfo.name}</h1>
-                    <h2>Genres: {gameInfo.genres}</h2>
-                    <h4>Release date: {gameInfo.release_date}</h4>
-                </div>
-                <div>
                     <p>Description: {gameInfo.description}</p>
-                    <p>Publisher: {gameInfo.publisher}</p>
-                    <p>Developer: {gameInfo.developer}</p>
-                    <p>Rating: {handleRating}</p>
+                </div>
+                <div className="row text-center">
+                    <div className="col-md-6 col-12">
+                        <h4 className="mb-2">Genres: {gameInfo.genres}</h4>
+                        <h4 className="mb-2">Rating: {rating ? rating : "Not rated by users yet."}</h4>
+                    </div>
+                    <div className="col-md-6 col-12">
+                        <h4 className="mb-2">Publisher: {gameInfo.publisher}</h4>
+                        <h4 className="mb-2">Developer: {gameInfo.developer}</h4>
+                    </div>
+                    <div className="col-12 mb-5">
+                        <h5>Release date: {gameInfo.release_date}</h5>
+                    </div>
                 </div>
                 <div>
-                    <ul>
-                        {reviews.map((item, index) => <li key={index}>
-                            <p>{item.review_text}</p>
+                    <h4 className="mb-4 login-color">User reviews</h4>
+                    <ul className="p-0 mb-5">
+                        {reviews.map((item, index) => <li className="review" key={index}>
+                            <div className="">
+                                <h4 className="me-2">{users[index].username}:</h4>
+                            </div>
+                            <p className="m-0">{item.review_text}</p>
                         </li>)}
                     </ul>
                 </div>
@@ -220,36 +272,54 @@ export const GameDetails = () => {
     }
     if (localStorage.getItem("admin") == "true") {
         return (
-            <div className="container text-center">
-                <div>
-                    <div>coverHere</div>
+            <div className="container game-card rounded mt-4">
+                <div className="row text-center">
+                    <div className="col-12 d-flex justify-content-center align-self-center">
+                        <div className="img-container-lg">
+                            <img className="game-list-img mt-2 mb-2" src={gameInfo.cover_link ? gameInfo.cover_link : ""}></img>
+                        </div>
+                    </div>
                     <h1>{gameInfo.name}</h1>
-                    <h2>Genres: {gameInfo.genres}</h2>
-                    <h4>{gameInfo.release_date}</h4>
-                </div>
-                <div>
                     <p>Description: {gameInfo.description}</p>
-                    <p>Publisher: {gameInfo.publisher}</p>
-                    <p>Developer: {gameInfo.developer}</p>
-                    <p>Rating: {handleRating}</p>
                 </div>
-                <button onClick={() => handleAddGames(game_id)} >Add to backlog</button>
+                <div className="row text-center">
+                    <div className="col-md-6 col-12">
+                        <h4 className="mb-2">Genres: {gameInfo.genres}</h4>
+                        <h4 className="mb-2">Rating: {rating ? rating : "Not rated by users yet."}</h4>
+                    </div>
+                    <div className="col-md-6 col-12">
+                        <h4 className="mb-2">Publisher: {gameInfo.publisher}</h4>
+                        <h4 className="mb-2">Developer: {gameInfo.developer}</h4>
+                    </div>
+                    <div className="col-12 mb-5">
+                        <h5>Release date: {gameInfo.release_date}</h5>
+                    </div>
+                </div>
                 <div>
-                    <p>Reviews:</p>
-                    <ul>
-                        {reviews.map((item) => <li key={item.id}>
-                            <p>{item.review_text}</p>
-                            <button onClick={() => { deleteButton(item.id) }} >Delete</button>
+                    <h4 className="mb-4 login-color">User reviews</h4>
+                    <ul className="p-0 mb-5">
+                        {reviews.map((item, index) => <li className="review" key={index}>
+                            <div className="row align-items-center">
+                                <div className="col-12 col-md-10">
+                                    <h4 className="me-2">{users[index].username}:</h4>
+                                    <p className="m-0">{item.review_text}</p>
+                                </div>
+                                <div className="col-12 col-md-2 d-flex justify-content-md-end justify-content-sm-center">
+                                    <button className="btn navbar-links" onClick={() => deleteButton(reviews.id)}>Delete</button>
+                                </div>
+                            </div>
+
                         </li>)}
                     </ul>
                 </div>
                 <div>
                     <form onSubmit={(e) => e.preventDefault()}>
                         <div className="mb-3">
-                            <hr />
                             <textarea className="form-control" id="review" rows="3" type="text" value={review} onChange={(e) => setReview(e.target.value)}></textarea>
                         </div>
-                        <button type="submit" onClick={() => posted ? handleReviews("PUT") : handleReviews("POST")} className="btn btn-secondary">Post review</button>
+                        <div className="d-flex justify-content-center">
+                            <button className="btn navbar-links" type="submit" onClick={() => posted ? handleReviews("PUT") : handleReviews("POST")}>Post review</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -257,35 +327,51 @@ export const GameDetails = () => {
     }
 
     return (
-        <div className="container text-center">
-            <div>
-                <div>coverHere</div>
+        <div className="container game-card rounded mt-4">
+            <div className="row text-center">
+                <div className="col-12 d-flex justify-content-center align-self-center">
+                    <div className="img-container-lg">
+                        <img className="game-list-img mt-2 mb-2" src={gameInfo.cover_link ? gameInfo.cover_link : ""}></img>
+                    </div>
+                </div>
                 <h1>{gameInfo.name}</h1>
-                <h2>Genres: {gameInfo.genres}</h2>
-                <h4>{gameInfo.release_date}</h4>
-            </div>
-            <div>
                 <p>Description: {gameInfo.description}</p>
-                <p>Publisher: {gameInfo.publisher}</p>
-                <p>Developer: {gameInfo.developer}</p>
-                <p>Rating: {handleRating}</p>
             </div>
-            <button onClick={() => handleAddGames(game_id)} >Add to backlog</button>
+            <div className="row text-center">
+                <div className="col-md-6 col-12">
+                    <h4 className="mb-2">Genres: {gameInfo.genres}</h4>
+                    <h4 className="mb-2">Rating: {rating ? rating : "Not rated by users yet."}</h4>
+                </div>
+                <div className="col-md-6 col-12">
+                    <h4 className="mb-2">Publisher: {gameInfo.publisher}</h4>
+                    <h4 className="mb-2">Developer: {gameInfo.developer}</h4>
+                </div>
+                <div className="col-12 mb-5">
+                    <h5>Release date: {gameInfo.release_date}</h5>
+                </div>
+                <div className="d-flex justify-content-center">
+                    <button className="btn navbar-links" onClick={() => handleAddGames(gameInfo.id)}>Add to backlog</button>
+                </div>
+            </div>
             <div>
-                <ul>
-                    {reviews.map((item) => <li key={item.id}>
-                        <p>{item.review_text}</p>
-                        {removeButton(item.id)}
+                <h4 className="mb-4 login-color">User reviews</h4>
+                <ul className="p-0 mb-5">
+                    {reviews.map((item, index) => <li className="review" key={index}>
+                        <div className="">
+                            <h4 className="me-2">{users[index].username}:</h4>
+                        </div>
+                        <p className="m-0">{item.review_text}</p>
                     </li>)}
                 </ul>
             </div>
             <div>
                 <form onSubmit={(e) => e.preventDefault()}>
                     <div className="mb-3">
-                        <hr />
                         <textarea className="form-control" id="review" rows="3" type="text" value={review} onChange={(e) => setReview(e.target.value)}></textarea>
                     </div>
-                    <button type="submit" onClick={() => posted ? handleReviews("PUT") : handleReviews("POST")} className="btn btn-secondary">Post review</button>
+                    <div className="d-flex justify-content-center">
+                        <button className="btn navbar-links" type="submit" onClick={() => posted ? handleReviews("PUT") : handleReviews("POST")}>Post review</button>
+                    </div>
                 </form>
             </div>
         </div>

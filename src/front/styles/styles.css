@@ -1,0 +1,138 @@
+body > #root {
+  position: relative;
+  min-height: 100vh;
+  padding-bottom: 2.5rem;
+}
+body {
+  background-color: #ffd1dc;
+}
+
+.navbar {
+  background-color: #d1f3ff;
+}
+
+.navbar-toggler {
+  z-index: 1000;
+}
+
+.navbar-collapse {
+  background-color: #d1f3ff;
+}
+
+.navbar-links {
+  color: #8e5dce;
+  font-size: larger;
+  text-decoration: none;
+}
+
+.navbar-links:hover {
+  color: #4b0cc0;
+}
+
+.login-dropdown {
+  width: 250px;
+  background-color: #d1f3ff;
+}
+
+.profile-dropdown {
+  background-color: #d1f3ff;
+}
+
+.jumbotron-image {
+  background-image: url("../assets/img/jumbotron.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.text-color-jumbo-h1 {
+  color: #b19cd9;
+  text-shadow: 3px 1px #cfb3f5;
+}
+
+.text-color-jumbo-p {
+  color: #8e5dce;
+  font-size: large;
+}
+
+.game-card {
+  border: 1px solid #d1f3ff;
+  background-color: #d1f3ff;
+  color: #8e5dce;
+  list-style: none;
+}
+
+.img-container-sm {
+  width: 300px;
+  height: 200px;
+}
+
+.img-container-lg {
+  width: 500px;
+  height: 200px;
+}
+
+.img-container-profile {
+  width: 200px;
+  height: 125px;
+}
+
+.game-list-img {
+  object-fit: contain;
+  width: 100%;
+  height: 100%;
+}
+
+.login-color {
+  color: #8e5dce;
+  font-weight: bold;
+}
+
+.button-css {
+  background-color: #d1f3ff;
+  color: #8e5dce;
+}
+
+.button-css:hover {
+  background-color: #a4e2f7;
+  color: #8e5dce;
+}
+
+.modal-title-color {
+  color: #8e5dce;
+}
+
+.modal-css {
+  background-color: #ffd1dc;
+}
+
+.modal-header,
+.modal-body {
+  border-bottom: 1px solid #9f8bb8;
+}
+
+.modal-footer {
+  border: 0px;
+}
+
+label::after {
+  background-color: #d1f3ff !important;
+}
+
+.form-input-css {
+  background-color: #d1f3ff;
+  color: #8e5dce;
+}
+
+.review {
+  border-top: 1px solid #8e5dce;
+  border-bottom: 1px solid #8e5dce;
+  list-style: none;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 2.5rem;
+}

@@ -147,7 +147,7 @@ def games_handle():
                 publisher = request.json.get("publisher")
                 developer = request.json.get("developer")
                 release = request.json.get("release")
-                cover_link = request.json.get("coverlink")
+                cover_link = request.json.get("cover_link")
 
                 new_game = Games(
                     name=name,
@@ -294,12 +294,25 @@ def backlog(username):
     backlog = db.session.execute(select(BacklogList).where(
         BacklogList.user_id == user_id)).scalars().all()
     games_info = []
+
     for i in backlog:
         games_info.append(db.session.execute(
             select(Games).where(Games.id == i.game_id)).scalar())
+
+    games_info = list(
+        map(lambda games_info: games_info.serialize(), games_info))
+    backlog = list(map(lambda backlog: backlog.serialize(), backlog))
+    games_info = sorted(games_info, key=lambda x: x["name"])
+    backlog_ordered = []
+
+    for i in games_info:
+        for j in backlog:
+            if i["id"] == j["game_id"]:
+                backlog_ordered.append(j)
+
     response_body = {
-        "backlog": list(map(lambda backlog: backlog.serialize(), backlog)),
-        "games": list(map(lambda games_info: games_info.serialize(), games_info))
+        "backlog": backlog_ordered,
+        "games": games_info
     }
 
     return jsonify(response_body), 200
@@ -310,16 +323,22 @@ def rating_handle(id):
     ratings = db.session.execute(select(BacklogList.rating).where(
         BacklogList.game_id == id)).scalars().all()
     rating = 0
+    emptyRating = 0
 
     if not ratings[0]:
         response_body = {
             "msg": "No ratings for this game"
         }, 400
         return jsonify()
-    for i in ratings:
-        rating += i
 
-    rating = rating / ratings.length()
+    for i in ratings:
+        if i != None:
+            rating += i
+        else:
+            emptyRating += 1
+
+    rating = rating / (len(ratings) - emptyRating)
+
     response_body = {
         "rating": rating,
     }
@@ -327,7 +346,7 @@ def rating_handle(id):
     return jsonify(response_body), 200
 
 
-@api.route('/reviews', methods=["GET", 'POST', 'PUT', 'DELETE'])
+@api.route('/reviews', methods=['POST', 'PUT', 'DELETE'])
 @jwt_required()
 def reviews_handle():
     current_user_identity = get_jwt_identity()
@@ -360,7 +379,7 @@ def reviews_handle():
         case "PUT":
             review = request.json.get("review")
             db.session.execute(update(Reviews).where(
-                Reviews.user_id == user.id).where(Reviews.game_id == game_id)).values(review_text=review)
+                Reviews.user_id == user.id).where(Reviews.game_id == game_id).values(review_text=review))
             db.session.commit()
             return jsonify({
                 "msg": "Game review succesfully edited."
@@ -376,10 +395,15 @@ def reviews_handle():
 
 @api.route('/reviews/<int:id>', methods=['GET'])
 def reviews(id):
+    users = []
     reviews = db.session.execute(select(Reviews).where(
         Reviews.game_id == id)).scalars().all()
+    for i in reviews:
+        users.append(db.session.execute(select(User).where(
+            User.id == i.user_id)).scalar())
     response_body = {
-        "reviews": list(map(lambda reviews: reviews.serialize(), reviews))
+        "reviews": list(map(lambda reviews: reviews.serialize(), reviews)),
+        "users": list(map(lambda users: users.serialize(), users))
     }
 
     return jsonify(response_body), 200
