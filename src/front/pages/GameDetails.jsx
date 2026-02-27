@@ -305,7 +305,7 @@ export const GameDetails = () => {
                                     <p className="m-0">{item.review_text}</p>
                                 </div>
                                 <div className="col-12 col-md-2 d-flex justify-content-md-end justify-content-sm-center">
-                                    <button className="btn navbar-links" onClick={() => deleteButton(reviews.id)}>Delete</button>
+                                    <button className="btn navbar-links" onClick={() => { deleteButton(item.id) }}>Delete</button>
                                 </div>
                             </div>
 

@@ -465,7 +465,7 @@ def suggestions():
             if not user.is_admin:
                 return jsonify({"msg": "Nice try"}), 409
             db.session.execute(delete(Suggestions).where(
-                Suggestions.id == request.json.get("suggestion_id")))
+                Suggestions.id == request.json.get("id")))
             db.session.commit()
             return jsonify({
                 "msg": "Suggestions deleted suscessfully."

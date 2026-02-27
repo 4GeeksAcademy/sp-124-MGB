@@ -113,7 +113,7 @@ export const Dashboard = () => {
             });
 
             const data = await res.json();
-
+            console.log(data)
             if (!res.ok) {
                 return data.msg;
             }
@@ -155,7 +155,7 @@ export const Dashboard = () => {
                                 <p className="me-2 mb-1">User id: {item.user_id}</p>
                                 <p className="me-2 mb-1"> Suggestion: {item.suggestion}</p>
                             </div>
-                            <span className="btn navbar-links" onClick={() => { deleteButton(item.id) }} >Delete</span>
+                            <span className="btn navbar-links" onClick={() => deleteButton(item.id)} >Delete</span>
                         </li>)}
                     </ul>
                 </div>

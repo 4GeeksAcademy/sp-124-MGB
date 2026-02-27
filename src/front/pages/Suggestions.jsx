@@ -1,13 +1,14 @@
 import { useState } from "react";
-
+import { useNavigate } from "react-router-dom";
+import Swal from 'sweetalert2'
 // Define and export the Single component which displays individual item details.
 export const Suggestions = () => {
     // Access the global state using the custom hook.
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const [suggestion, setSuggestion] = useState("")
+    const navigate = useNavigate()
 
     const handlePost = async (e) => {
-        console.log(suggestion)
         e.preventDefault();
         try {
             if (!backendUrl) throw new Error("VITE_BACKEND_URL is not defined in .env file");
@@ -21,10 +22,22 @@ export const Suggestions = () => {
             }
             );
             const datajson = await response.json();
-            if (response.ok) {
-                setSuggestions(datajson.suggestions)
+            if (!response.ok) {
+                Swal.fire({
+                    title: 'Posted',
+                    text: 'Suggestion was not able to be posted',
+                    icon: 'error',
+                    confirmButtonText: 'Close'
+                })
+                return
             }
-
+            Swal.fire({
+                title: 'Posted',
+                text: 'Suggestion posted successfully',
+                icon: 'success',
+                confirmButtonText: 'Close'
+            })
+            navigate(-1)
 
         } catch (err) { }
     }
