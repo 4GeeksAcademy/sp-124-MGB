@@ -45,6 +45,30 @@ body {
   background-repeat: no-repeat;
 }
 
+.home-container {
+  width: 50%;
+}
+
+.img-cont-home {
+  height: 250px;
+}
+
+.jumbotron-image-2 {
+  background-image: url("../assets/img/Cozy-Games.jpg");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 100%;
+}
+
+.jumbotron-image-3 {
+  background-image: url("../assets/img/Cozy-backlog.jpg");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 100%;
+}
+
 .text-color-jumbo-h1 {
   color: #b19cd9;
   text-shadow: 3px 1px #cfb3f5;
@@ -52,7 +76,6 @@ body {
 
 .text-color-jumbo-p {
   color: #8e5dce;
-  font-size: large;
 }
 
 .game-card {
