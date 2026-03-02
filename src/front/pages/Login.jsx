@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import useGlobalReducer from "../hooks/useGlobalReducer.jsx"
 
 export const Login = () => {
+    const { dispatch } = useGlobalReducer();
     const navigate = useNavigate();
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const [username, setUsername] = useState("");
@@ -29,6 +31,7 @@ export const Login = () => {
             localStorage.setItem("email", data.email);
             localStorage.setItem("username", username);
             localStorage.setItem("admin", data.role);
+            dispatch({ type: "set-changes", payload: true })
             navigate(-1);
         } catch (err) {
 

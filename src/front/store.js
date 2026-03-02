@@ -1,15 +1,15 @@
 export const initialStore = () => {
   return {
-    admin: false,
+    changes: false,
   };
 };
 
 export default function storeReducer(store, action = {}) {
   switch (action.type) {
-    case "set-admin":
+    case "set-changes":
       return {
         ...store,
-        admin: action.payload,
+        changes: action.payload,
       };
   }
 }

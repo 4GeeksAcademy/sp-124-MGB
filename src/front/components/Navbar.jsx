@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import useGlobalReducer from "../hooks/useGlobalReducer.jsx"
 
 export const Navbar = () => {
+	const { store, dispatch } = useGlobalReducer();
 	const backendUrl = import.meta.env.VITE_BACKEND_URL;
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
@@ -50,6 +52,11 @@ export const Navbar = () => {
 	};
 
 	useEffect(() => {
+		dispatch({ type: "set-changes", payload: false });
+		console.log("a")
+	}, [store.changes])
+
+	useEffect(() => {
 		window.addEventListener("resize", updateMedia);
 		return () => window.removeEventListener("resize", updateMedia);
 	});
@@ -64,19 +71,19 @@ export const Navbar = () => {
 					<div className="collapse navbar-collapse justify-content-center" id="navbarSupportedContent">
 						<ul className="navbar-nav mb-2 mb-lg-0 text-center">
 							<li className="nav-item">
-								<Link className="navbar-links me-5" to="/">
+								<Link className="navbar-links me-lg-5" to="/">
 									<span>
 										Home
 									</span>
 								</Link>
 							</li>
 							<li className="nav-item">
-								<Link className="navbar-links me-5" to="/games">
+								<Link className="navbar-links me-lg-5" to="/games">
 									<span>Games list</span>
 								</Link>
 							</li>
 							<li className="nav-item">
-								<Link className="navbar-links me-5" to="/signup">
+								<Link className="navbar-links me-lg-5" to="/signup">
 									<span>Signup</span>
 								</Link>
 							</li>
@@ -103,7 +110,7 @@ export const Navbar = () => {
 										<button type="submit" className=" btn me-2 navbar-links d-flex justify-content-end">Login</button>
 									</form>
 								</ul>
-							</li>) : (<li className="nav-item"><Link className="navbar-links me-5" to="/login">
+							</li>) : (<li className="nav-item"><Link className="navbar-links me-lg-5" to="/login">
 								<span>Login</span>
 							</Link></li>)}
 						</ul>
@@ -123,19 +130,19 @@ export const Navbar = () => {
 					<div className="collapse navbar-collapse justify-content-center" id="navbarSupportedContent">
 						<ul className="navbar-nav mb-2 mb-lg-0 text-center">
 							<li className="nav-item">
-								<Link className="navbar-links me-5" to="/">
+								<Link className="navbar-links me-lg-5" to="/">
 									<span>
 										Home
 									</span>
 								</Link>
 							</li>
 							<li className="nav-item">
-								<Link className="navbar-links me-5" to="/games">
+								<Link className="navbar-links me-lg-5" to="/games">
 									<span>Games list</span>
 								</Link>
 							</li >
 							<li className="nav-item">
-								<Link className="navbar-links me-5" to="/suggestions">
+								<Link className="navbar-links me-lg-5" to="/suggestions">
 									<span>Suggestions</span>
 								</Link>
 							</li>
@@ -160,7 +167,7 @@ export const Navbar = () => {
 										</Link>
 									</li>
 									<li>
-										<span className="navbar-links" onClick={() => handleSignOut()}>Sign out</span>
+										<span className="btn p-0 navbar-links" onClick={() => handleSignOut()}>Sign out</span>
 									</li>
 								</ul>
 							</li>
@@ -180,19 +187,19 @@ export const Navbar = () => {
 				<div className="collapse navbar-collapse justify-content-center" id="navbarSupportedContent">
 					<ul className="navbar-nav mb-2 mb-lg-0 text-center">
 						<li className="nav-item">
-							<Link className="navbar-links me-5" to="/">
+							<Link className="navbar-links me-lg-5" to="/">
 								<span>
 									Home
 								</span>
 							</Link>
 						</li>
 						<li className="nav-item">
-							<Link className="navbar-links me-5" to="/games">
+							<Link className="navbar-links me-lg-5" to="/games">
 								<span>Games list</span>
 							</Link>
 						</li >
 						<li className="nav-item">
-							<Link className="navbar-links me-5" to="/suggestions">
+							<Link className="navbar-links me-lg-5" to="/suggestions">
 								<span>Suggestions</span>
 							</Link>
 						</li>
@@ -212,7 +219,7 @@ export const Navbar = () => {
 									</Link>
 								</li>
 								<li>
-									<span className="navbar-links" onClick={() => handleSignOut()}>Sign out</span>
+									<span className="btn p-0 navbar-links" onClick={() => handleSignOut()}>Sign out</span>
 								</li>
 							</ul>
 						</li>
