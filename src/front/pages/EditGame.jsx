@@ -62,7 +62,7 @@ export const EditGame = () => {
                 return data.msg;
             }
 
-            navigate("/games")
+            navigate("/dashboard")
 
         } catch (err) {
 
@@ -86,11 +86,16 @@ export const EditGame = () => {
                     <select value={genres} onChange={(e) => setGenres(e.target.value)} className="form-select mb-3" aria-label="Default select example">
                         <option value="Action">Action</option>
                         <option value="Adventure">Adventure</option>
+                        <option value="Horror">Horror</option>
                         <option value="Life Sim">Life Sim</option>
+                        <option value="Farming">Farming</option>
+                        <option value="JRPG">JRPG</option>
+                        <option value="Survival">Survival</option>
                         <option value="RPG">RPG</option>
                         <option value="Platformer">Platformer</option>
                         <option value="Puzzles">Puzzles</option>
                         <option value="Shooter">Shooter</option>
+                        <option value="MMO">MMO</option>
                     </select>
                     <input className="form-control mb-3"
                         placeholder="Publisher"
